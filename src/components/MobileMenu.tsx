@@ -1,6 +1,8 @@
 // src/components/MobileMenu.tsx
 "use client";
 
+import Link from 'next/link'; // Importando o Link
+
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,11 +30,12 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         </div>
         <nav>
           <ul className="space-y-4">
-            <li><a href="/" className="hover:text-yellow-400">Início</a></li>
-            <li><a href="/campanhas" className="hover:text-yellow-400">Campanhas</a></li>
-            <li><a href="/meus-numeros" className="hover:text-yellow-400">Meus títulos</a></li>
-            <li><a href="/ganhadores" className="hover:text-yellow-400">Ganhadores</a></li>
-            <li><a href="/contato" className="hover:text-yellow-400">Suporte</a></li>
+            {/* Usando o componente Link do Next.js */}
+            <li><Link href="/" className="hover:text-yellow-400">Início</Link></li>
+            <li><Link href="/campanhas" className="hover:text-yellow-400">Campanhas</Link></li>
+            <li><Link href="/meus-numeros" className="hover:text-yellow-400">Meus títulos</Link></li>
+            <li><Link href="/ganhadores" className="hover:text-yellow-400">Ganhadores</Link></li>
+            <li><Link href="/contato" className="hover:text-yellow-400">Suporte</Link></li>
           </ul>
         </nav>
       </div>
