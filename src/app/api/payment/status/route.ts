@@ -17,6 +17,12 @@ function generateTitles(quantity: number): string[] {
     return Array.from(titles);
 }
 
+// Interface para o item da transação SkalePay para evitar o uso de 'any'.
+interface SkalePayItem {
+    quantity: number;
+    // outras propriedades podem ser adicionadas aqui se necessário.
+}
+
 // Alterado para POST para evitar o cache agressivo da Vercel em rotas GET.
 export async function POST(request: Request) {
     const secretKey = process.env.SKALEPLAY_SECRET_KEY;
@@ -32,7 +38,7 @@ export async function POST(request: Request) {
         if (!transactionId) {
             return NextResponse.json({ success: false, message: 'ID da transação não fornecido.' }, { status: 400 });
         }
-    } catch (error) {
+    } catch (_error) { // FIX: Renamed 'error' to '_error' as it is not used.
         return NextResponse.json({ success: false, message: 'Corpo da requisição inválido.' }, { status: 400 });
     }
 
@@ -46,7 +52,6 @@ export async function POST(request: Request) {
                 'Authorization': `Basic ${authString}`,
                 'Content-Type': 'application/json',
             },
-            // Adicionado para garantir que a Vercel não cacheie a resposta da API externa.
             cache: 'no-store',
         });
         
@@ -60,7 +65,8 @@ export async function POST(request: Request) {
         let titles: string[] = [];
 
         if (data.status === 'paid') {
-            const quantity = data.items.reduce((acc: number, item: any) => acc + item.quantity, 0);
+            // FIX: Defined a specific type for the 'item' instead of 'any'.
+            const quantity = data.items.reduce((acc: number, item: SkalePayItem) => acc + item.quantity, 0);
             titles = generateTitles(quantity > 0 ? quantity : 1);
         }
 
