@@ -108,8 +108,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const phoneDigits = formData.telefone.replace(/\D/g, '');
-    if (phoneDigits.length < 11) {
-        setError('Telefone inválido. Por favor, inclua o DDD e o número completo.');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+        setError('Telefone inválido. Por favor, insira um número com 10 ou 11 dígitos, incluindo o DDD.');
         return;
     }
     setError(null);
@@ -170,7 +170,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
           <form className="space-y-2" onSubmit={handlePhoneSubmit}>
               <div>
                   <label htmlFor="telefone" className="block text-sm font-semibold text-gray-800 mb-1">Informe seu telefone</label>
-                  <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="(00) 00000-0000" inputMode="numeric" pattern="[0-9]*" maxLength={15} />
+                  <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="(00) 00000-0000" inputMode="numeric" maxLength={15} />
                   {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
               </div>
               <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={!formData.telefone}>
