@@ -55,10 +55,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutos em segundos
 
   useEffect(() => {
-    // Bloquear o scroll do body quando o modal estiver aberto
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      // Resetar estados quando o modal for reaberto
       setStep(1);
       setFormData({ nome: '', email: '', cpf: '', telefone: '' });
       setPixData(null);
@@ -68,7 +66,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     } else {
       document.body.style.overflow = 'auto';
     }
-    // Limpeza ao desmontar o componente
     return () => {
       document.body.style.overflow = 'auto';
     };
@@ -94,8 +91,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui teríamos a lógica para verificar o telefone.
-    // Como não temos DB, vamos sempre para a etapa de cadastro.
     setStep(2); 
   }
 
@@ -124,8 +119,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       }
       
       setPixData(data);
-      setStep(3); // Mudar para a etapa de pagamento
-      // Ocultar QR Code por padrão em telas menores (mobile)
+      setStep(3);
       setShowQr(window.innerWidth >= 768);
 
     } catch (err: unknown) {
@@ -149,7 +143,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
   const renderStep = () => {
     switch (step) {
-      case 1: // Etapa do Telefone
+      case 1:
         return (
           <form className="space-y-2" onSubmit={handlePhoneSubmit}>
               <div>
@@ -162,7 +156,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
               </button>
           </form>
         );
-      case 2: // Etapa de Cadastro
+      case 2:
         return (
             <form className="space-y-2" onSubmit={handlePayment}>
                 <div>
@@ -187,7 +181,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                 </button>
             </form>
         );
-      case 3: // Etapa de Pagamento
+      case 3:
         return (
             <div className="space-y-2 max-h-[70vh] overflow-y-auto">
                 <div className="text-center p-2">
