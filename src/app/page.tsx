@@ -14,7 +14,7 @@ export default function Home() {
       
       {/* Container para Banner */}
       <div className="relative">
-        <div className="h-[200px] w-full">
+        <div className="h-[300px] w-full">
           <div className="relative h-full w-full">
             <Image
               src="https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg"
