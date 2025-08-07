@@ -146,11 +146,12 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       }
 
       if (data.found) {
+        const maskedCpf = data.cliente.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
         setFormData(prev => ({
           ...prev,
           nome: data.cliente.nome,
           email: data.cliente.email || '', // Email é opcional no bd, garantir que não seja null
-          cpf: data.cliente.cpf,
+          cpf: maskedCpf,
         }));
         setIsClientFound(true);
       } else {
@@ -284,7 +285,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                 )}
                 <div>
                     <label htmlFor="nome" className="block text-sm font-semibold text-gray-800 mb-1">Nome Completo</label>
-                    <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleInputChange} readOnly={isClientFound} className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base ${isClientFound ? 'bg-gray-100' : ''}`} placeholder="Seu nome completo" />
+                    <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" placeholder="Seu nome completo" />
                 </div>
                 <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">E-mail</label>
@@ -292,7 +293,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                 </div>
                 <div>
                     <label htmlFor="cpf" className="block text-sm font-semibold text-gray-800 mb-1">CPF</label>
-                    <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleInputChange} readOnly={isClientFound} className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base ${isClientFound ? 'bg-gray-100' : ''}`} placeholder="000.000.000-00" inputMode="numeric" maxLength={14} />
+                    <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" placeholder="000.000.000-00" inputMode="numeric" maxLength={14} />
                 </div>
                 {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
                 <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={isLoading || !formData.nome || !formData.email || !formData.cpf}>
