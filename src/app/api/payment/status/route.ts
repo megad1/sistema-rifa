@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     }
 
     const result = await response.json();
-    let titles: string[] = [];
+    const titles: string[] = [];
 
     // Se o pagamento foi confirmado, geramos os títulos.
     if (result.status === 'paid' && result.items && result.items.length > 0) {

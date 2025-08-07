@@ -1,7 +1,7 @@
 // src/components/CheckoutModal.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 interface CheckoutModalProps {
@@ -93,14 +93,12 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   useEffect(() => {
     if (step === 3 && paymentStatus === 'pending' && timeLeft > 0) {
       const interval = setInterval(() => {
-        // Não mostra o ícone de 'loading' na verificação automática
-        // para não poluir a interface do usuário. Apenas verifica.
         handleCheckPaymentStatus(true); 
-      }, 5000); // Verifica a cada 5 segundos
+      }, 5000);
 
       return () => clearInterval(interval);
     }
-  }, [step, paymentStatus, timeLeft]);
+  }, [step, paymentStatus, timeLeft, handleCheckPaymentStatus]);
 
   if (!isOpen) {
     return null;
@@ -186,7 +184,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     }
   };
   
-  const handleCheckPaymentStatus = async (isSilent = false) => {
+  const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
     if (!pixData?.token) return;
 
     if (!isSilent) {
@@ -199,7 +197,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-            // Em modo silencioso, não mostramos o erro para não interromper o usuário
             if (!isSilent) {
                 throw new Error(data.message || 'Não foi possível verificar o pagamento.');
             }
@@ -209,7 +206,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         setPaymentStatus(data.status);
 
         if (data.status === 'paid') {
-            setError(null); // Limpa qualquer erro anterior se o pagamento for confirmado
+            setError(null);
             if (data.titles && data.titles.length > 0) {
                 setTitles(data.titles);
             }
@@ -241,7 +238,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             setIsVerifying(false);
         }
     }
-  };
+  }, [pixData?.token, setPaymentStatus, setTitles, setPaidAt, setError, setIsVerifying]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
