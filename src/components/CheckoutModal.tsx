@@ -325,7 +325,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                                 ))}
                             </div>
                         ) : (
-                            <span className="text-gray-500"> os títulos serão adicionados após o pagamento</span>
+                            <span className="text-gray-500"> Os títulos serão adicionados após o pagamento</span>
                         )}
                     </div>
                 </div>

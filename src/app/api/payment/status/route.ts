@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'; // Impede o cache da rota
+
 const SKALEPAY_API_URL = 'https://api.conta.skalepay.com.br/v1';
 
 /**
@@ -72,4 +74,3 @@ export async function GET(request: Request) {
     });
   }
 }
-
