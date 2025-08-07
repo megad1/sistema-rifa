@@ -1,7 +1,8 @@
 // src/components/CheckoutModal.tsx
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Inter } from "next/font/google";
 
@@ -23,6 +24,10 @@ interface PixData {
     valor: number;
     comprador: CompradorData;
 }
+interface UtmParams {
+    [key: string]: string;
+}
+
 
 // --- Constantes e Funções de Utilitário ---
 const TICKET_PRICE = 0.11;
@@ -35,7 +40,7 @@ const formatPhone = (phone: string) => {
     return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) *****-**$3');
 };
 
-const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
+const CheckoutModalContent = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   // --- Estados do Componente ---
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -50,6 +55,10 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [paidAt, setPaidAt] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
+  const [utmParams, setUtmParams] = useState<UtmParams>({});
+
+  // --- Hooks ---
+  const searchParams = useSearchParams();
   
   // --- Refs para lógica de polling ---
   const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
@@ -148,6 +157,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         body: JSON.stringify({ 
           valor: quantity * TICKET_PRICE,
           quantity: quantity,
+          utmParams: utmParams,
           ...formData
         }),
       });
@@ -162,7 +172,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, quantity]);
+  }, [formData, quantity, utmParams]);
   
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
@@ -173,6 +183,19 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('modal-open');
+      
+      // Captura UTMs da URL
+      const utms: UtmParams = {};
+      const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+      utmKeys.forEach(key => {
+        const value = searchParams.get(key);
+        if (value) {
+          utms[key] = value;
+        }
+      });
+      setUtmParams(utms);
+
+      // Reseta o estado do modal
       setStep(1);
       setFormData({ nome: '', email: '', cpf: '', telefone: '' });
       setPixData(null);
@@ -187,7 +210,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       document.body.classList.remove('modal-open');
     }
     return () => { document.body.classList.remove('modal-open'); };
-  }, [isOpen]);
+  }, [isOpen, searchParams]);
 
   useEffect(() => {
     if (pixData && timeLeft > 0 && paymentStatus !== 'paid') {
@@ -382,5 +405,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     </div>
   );
 };
+
+const CheckoutModal = (props: CheckoutModalProps) => {
+    return (
+        <Suspense fallback={null}>
+            <CheckoutModalContent {...props} />
+        </Suspense>
+    );
+};
+
 
 export default CheckoutModal;

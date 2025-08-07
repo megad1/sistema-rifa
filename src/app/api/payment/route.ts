@@ -34,7 +34,7 @@ function limparTelefone(telefone: string | null): string {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { valor, nome, email, cpf, telefone, quantity } = body;
+        const { valor, nome, email, cpf, telefone, quantity, utmParams } = body;
 
         if (!valor || valor <= 0 || !quantity || quantity <= 0) {
             throw new Error('Valor e quantidade são obrigatórios e devem ser maiores que zero.');
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
                     "tangible": false
                 }
             ],
+            "metadata": utmParams || {},
             "postbackUrl": `https://${request.headers.get('host')}/webhook/paguesafe`
         };
 
