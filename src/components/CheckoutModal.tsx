@@ -48,23 +48,32 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutos em segundos
 
   useEffect(() => {
-    if (!isOpen) {
-      // Resetar estados quando o modal for fechado
+    // Bloquear o scroll do body quando o modal estiver aberto
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      // Resetar estados quando o modal for reaberto
       setPixData(null);
       setTimeLeft(600);
       setShowQr(false);
       setPhone('');
       setError(null);
-      return;
+    } else {
+      document.body.style.overflow = 'auto';
     }
+    // Limpeza ao desmontar o componente
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
 
+  useEffect(() => {
     if (pixData && timeLeft > 0) {
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [isOpen, pixData, timeLeft]);
+  }, [pixData, timeLeft]);
 
   if (!isOpen) {
     return null;
@@ -95,7 +104,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       }
       
       setPixData(data);
-      setShowQr(true); // Exibir QR Code por padrão
+      // Ocultar QR Code por padrão em telas menores (mobile)
+      setShowQr(window.innerWidth >= 768);
 
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -138,20 +148,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
               <p className="text-gray-600">Você tem <b className="text-red-500 text-lg">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar</p>
             </div>
             
-            <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 space-y-3">
-              <div className="flex items-center space-x-2">
-                <span className="flex items-center justify-center w-6 h-6 bg-gray-200 text-gray-700 rounded-full font-bold text-sm">1</span>
-                <p className="text-gray-700 font-semibold">Copie o código PIX abaixo.</p>
-              </div>
-              <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
-                <span className="text-sm font-mono text-green-700 truncate mr-2">{pixData.pixCopiaECola}</span>
-                <button onClick={() => copyToClipboard(pixData.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1">
-                  <i className="bi bi-clipboard-check"></i>
-                  <span>Copiar</span>
-                </button>
-              </div>
-            </div>
-
             <div className="text-center">
               <button onClick={() => setShowQr(!showQr)} className="text-gray-600 font-semibold hover:text-black">
                 <i className={`bi ${showQr ? 'bi-eye-slash' : 'bi-qr-code'}`}></i>
@@ -160,14 +156,28 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             </div>
 
             {showQr && (
-              <div className="flex justify-center">
+              <div className="flex justify-center my-4">
                 <Image src={pixData.qrCodeUrl} alt="QR Code PIX" width={220} height={220} className="border-4 border-green-400 rounded-lg"/>
               </div>
             )}
             
+            <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 space-y-3">
+              <div className="flex items-center space-x-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-gray-200 text-gray-700 rounded-full font-bold text-sm">1</span>
+                <p className="text-gray-700 font-semibold">Copie o código PIX abaixo.</p>
+              </div>
+              <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
+                <span className="text-sm font-mono text-green-700 truncate mr-2">{pixData.pixCopiaECola}</span>
+                <button onClick={() => copyToClipboard(pixData.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
+                  <i className="bi bi-clipboard-check"></i>
+                  <span>Copiar</span>
+                </button>
+              </div>
+            </div>
+            
             <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 space-y-2 text-sm text-gray-600">
-                <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1">2</span><p>Abra o app do seu banco e escolha a opção PIX, como se fosse fazer uma transferência.</p></div>
-                <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1">3</span><p>Selecione a opção PIX cópia e cola, cole a chave copiada e confirme o pagamento.</p></div>
+                <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">2</span><p>Abra o app do seu banco e escolha a opção PIX, como se fosse fazer uma transferência.</p></div>
+                <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">3</span><p>Selecione a opção PIX cópia e cola, cole a chave copiada e confirme o pagamento.</p></div>
             </div>
 
             <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 p-3 text-sm rounded-r-md">
