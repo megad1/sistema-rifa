@@ -77,33 +77,40 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         
         if (!response.ok || !data.success) {
             if (!isSilent) throw new Error(data.message || 'Não foi possível verificar o pagamento.');
-            return; 
+            return; // Sai silenciosamente em caso de erro na verificação automática
         }
 
+        // A lógica principal de atualização de estado acontece aqui, para AMBOS os casos
         setPaymentStatus(data.status);
 
         if (data.status === 'paid') {
-            if (data.titles && data.titles.length > 0) setTitles(data.titles);
-            if (!isSilent) {
-                setError(null);
-                if (data.data?.paidAt) {
-                    const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
-                        day: '2-digit', month: '2-digit', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit', second: '2-digit',
-                    });
-                    setPaidAt(formattedDate);
-                }
+            setError(null); // Limpa qualquer erro anterior de 'pendente'
+            if (data.titles && data.titles.length > 0) {
+                setTitles(data.titles);
+            }
+            if (data.data?.paidAt) {
+                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                });
+                setPaidAt(formattedDate);
             }
         } else {
-            if (!isSilent) setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
+            // Mostra o erro de 'pendente' apenas se não for uma verificação silenciosa
+            if (!isSilent) {
+                setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
+            }
         }
     } catch (err: unknown) {
         if (!isSilent) {
             if (err instanceof Error) setError(err.message);
             else setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
         }
+        // Em caso de erro na verificação automática, não fazemos nada (evita spam de erros no console)
     } finally {
-        if (!isSilent) setIsVerifying(false);
+        if (!isSilent) {
+            setIsVerifying(false);
+        }
     }
   }, [pixData?.token]);
 
