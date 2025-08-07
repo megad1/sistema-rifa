@@ -40,12 +40,24 @@ export async function GET(request: Request) {
     }
 
     const result = await response.json();
+    let titles: string[] = [];
 
-    // Retornamos o status da transação para o frontend
+    // Se o pagamento foi confirmado, geramos os títulos.
+    if (result.status === 'paid' && result.items && result.items.length > 0) {
+      const quantity = result.items[0].quantity || 0;
+      for (let i = 0; i < quantity; i++) {
+        // Gera um número aleatório de 6 dígitos
+        const title = Math.floor(100000 + Math.random() * 900000).toString();
+        titles.push(title);
+      }
+    }
+
+    // Retornamos o status e os títulos (se houver) para o frontend
     return NextResponse.json({
       success: true,
       status: result.status, // Ex: 'paid', 'pending', 'expired'
       data: result,
+      titles: titles,
     });
 
   } catch (error) {

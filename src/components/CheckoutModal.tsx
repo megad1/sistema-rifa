@@ -56,6 +56,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
     const [paymentStatus, setPaymentStatus] = useState<'pending' | 'paid' | 'expired' | null>('pending');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [paidAt, setPaidAt] = useState<string | null>(null);
+  const [titles, setTitles] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -68,6 +70,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setError(null);
       setPaymentStatus('pending');
       setIsVerifying(false);
+      setPaidAt(null);
+      setTitles([]);
     } else {
       document.body.style.overflow = 'auto';
     }
@@ -156,6 +160,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         },
         body: JSON.stringify({ 
           valor: quantity * TICKET_PRICE,
+          quantity: quantity,
           ...formData
         }),
       });
@@ -203,10 +208,24 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
         setPaymentStatus(data.status);
 
-        if (data.status !== 'paid' && !isSilent) {
-            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
-        } else if(data.status === 'paid') {
+        if (data.status === 'paid') {
             setError(null); // Limpa qualquer erro anterior se o pagamento for confirmado
+            if (data.titles && data.titles.length > 0) {
+                setTitles(data.titles);
+            }
+            if (data.data?.paidAt) {
+                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                });
+                setPaidAt(formattedDate);
+            }
+        } else if (!isSilent) {
+            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
         }
 
     } catch (err: unknown) {
@@ -275,66 +294,74 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       case 3:
         return (
             <div className="space-y-2 max-h-[70vh] overflow-y-auto">
-                <div className="text-center p-2">
-                    <p className="text-sm text-gray-600">Você tem <b className="text-red-500">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar</p>
-                </div>
-                
-                <div className="text-center">
-                    <button onClick={() => setShowQr(!showQr)} className="text-sm text-gray-600 font-semibold hover:text-black">
-                        <i className={`bi ${showQr ? 'bi-eye-slash' : 'bi-qr-code'}`}></i>
-                        {showQr ? ' Ocultar QR Code' : ' Exibir QR Code'}
-                    </button>
-                </div>
 
-                {showQr && (
-                <div className="flex justify-center">
-                    <Image src={pixData!.qrCodeUrl} alt="QR Code PIX" width={200} height={200} className="border-4 border-green-400 rounded-lg"/>
-                </div>
-                )}
-                
-                <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-3 text-sm">
-                    <div className="flex items-center space-x-2">
-                        <span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs shrink-0">1</span>
-                        <p className="font-semibold text-gray-700">Copie o código PIX abaixo.</p>
+                {paymentStatus === 'paid' ? (
+                    // Tela de Pagamento Confirmado
+                    <div className="p-4 flex flex-col items-center text-center space-y-3">
+                        <i className="bi bi-check-circle-fill text-5xl text-green-500"></i>
+                        <h3 className="text-xl font-bold text-gray-800">Pagamento Confirmado!</h3>
+                        <p className="text-sm text-gray-600">Seu pagamento foi recebido com sucesso. Em breve você receberá seus números da sorte.</p>
                     </div>
-                    <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
-                        <span className="text-xs font-mono text-green-700 truncate mr-2">{pixData!.pixCopiaECola}</span>
-                        <button onClick={() => copyToClipboard(pixData!.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
-                        <i className="bi bi-clipboard-check"></i>
-                        <span>Copiar</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-2 text-xs text-gray-600">
-                    <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">2</span><p>Abra o app do seu banco e escolha a opção PIX, como se fosse fazer uma transferência.</p></div>
-                    <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">3</span><p>Selecione a opção PIX cópia e cola, cole a chave copiada e confirme o pagamento.</p></div>
-                </div>
+                ) : (
+                    // Tela para realizar o pagamento
+                    <>
+                        <div className="text-center p-2">
+                            <p className="text-sm text-gray-600">Você tem <b className="text-red-500">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar</p>
+                        </div>
+                        
+                        <div className="text-center">
+                            <button onClick={() => setShowQr(!showQr)} className="text-sm text-gray-600 font-semibold hover:text-black">
+                                <i className={`bi ${showQr ? 'bi-eye-slash' : 'bi-qr-code'}`}></i>
+                                {showQr ? ' Ocultar QR Code' : ' Exibir QR Code'}
+                            </button>
+                        </div>
 
-                <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 p-2 text-xs rounded-r-md">
-                    {paymentStatus === 'pending' && timeLeft > 0 && "Este pagamento só pode ser realizado dentro do tempo, após este período, caso o pagamento não for confirmado os números voltam a ficar disponíveis."}
-                    {paymentStatus === 'pending' && timeLeft === 0 && "O tempo para pagamento expirou. Por favor, gere um novo pedido."}
-                    {paymentStatus === 'paid' && "Seu pagamento foi confirmado com sucesso! Verifique seus números da sorte em breve."}
-                </div>
-
-                {/* Mensagem de erro da verificação */}
-                {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
-
-
-                {paymentStatus === 'pending' && timeLeft > 0 && (
-                    <button onClick={handleCheckPaymentStatus} disabled={isVerifying} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm transition-colors disabled:bg-green-800">
-                        {isVerifying ? (
-                            <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Verificando...</span></>
-                        ) : (
-                            <><i className="bi bi-check-circle-fill"></i><span>Já fiz o pagamento</span></>
+                        {showQr && (
+                        <div className="flex justify-center">
+                            <Image src={pixData!.qrCodeUrl} alt="QR Code PIX" width={200} height={200} className="border-4 border-green-400 rounded-lg"/>
+                        </div>
                         )}
-                    </button>
+                        
+                        <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-3 text-sm">
+                            <div className="flex items-center space-x-2">
+                                <span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs shrink-0">1</span>
+                                <p className="font-semibold text-gray-700">Copie o código PIX abaixo.</p>
+                            </div>
+                            <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
+                                <span className="text-xs font-mono text-green-700 truncate mr-2">{pixData!.pixCopiaECola}</span>
+                                <button onClick={() => copyToClipboard(pixData!.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
+                                <i className="bi bi-clipboard-check"></i>
+                                <span>Copiar</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-2 text-xs text-gray-600">
+                            <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">2</span><p>Abra o app do seu banco e escolha a opção PIX, como se fosse fazer uma transferência.</p></div>
+                            <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">3</span><p>Selecione a opção PIX cópia e cola, cole a chave copiada e confirme o pagamento.</p></div>
+                        </div>
+
+                        {paymentStatus === 'pending' && timeLeft === 0 && (
+                             <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-xs rounded-r-md">
+                                O tempo para pagamento expirou. Por favor, gere um novo pedido.
+                             </div>
+                        )}
+
+                        {/* Mensagem de erro da verificação */}
+                        {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
+
+
+                        {paymentStatus === 'pending' && timeLeft > 0 && (
+                            <button onClick={() => handleCheckPaymentStatus()} disabled={isVerifying} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm transition-colors disabled:bg-green-800">
+                                {isVerifying ? (
+                                    <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Verificando...</span></>
+                                ) : (
+                                    <><i className="bi bi-check-circle-fill"></i><span>Já fiz o pagamento</span></>
+                                )}
+                            </button>
+                        )}
+                    </>
                 )}
-                
-                <div className="bg-blue-100 border-l-4 border-blue-400 text-blue-800 p-2 text-xs rounded-r-md text-center">
-                    <i className="bi bi-info-circle-fill mr-1"></i>
-                    Aguarde até 5 minutos para a confirmação via sistema.
-                </div>
 
                 <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-1 text-sm">
                     <h4 className="font-bold text-gray-800 border-b pb-1 mb-2">Detalhes da sua compra</h4>
@@ -347,8 +374,23 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                         {paymentStatus === 'paid' && <span className="font-semibold text-green-600"> Pagamento confirmado</span>}
                         {paymentStatus === 'expired' && <span className="font-semibold text-red-600"> Expirado</span>}
                     </p>
+                    {paidAt && <p className="text-xs text-gray-700"><b>Data do Pagamento:</b> {paidAt}</p>}
                     <p className="text-xs text-gray-700"><b>Quantidade:</b> {quantity}</p>
                     <p className="text-xs font-bold text-gray-800"><b>Total:</b> {pixData!.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                    <div className="text-xs text-gray-700">
+                        <b>Títulos:</b>
+                        {titles.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {titles.map((title, index) => (
+                                    <span key={index} className="bg-blue-100 text-blue-800 font-semibold px-2 py-1 rounded-md text-xs">
+                                        {title}
+                                    </span>
+                                ))}
+                            </div>
+                        ) : (
+                            <span className="text-gray-500"> os títulos serão adicionados após o pagamento</span>
+                        )}
+                    </div>
                 </div>
 
             </div>

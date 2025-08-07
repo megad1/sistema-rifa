@@ -34,10 +34,10 @@ function limparTelefone(telefone: string | null): string {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { valor, nome, email, cpf, telefone } = body;
+        const { valor, nome, email, cpf, telefone, quantity } = body;
 
-        if (!valor || valor <= 0) {
-            throw new Error('Valor inválido');
+        if (!valor || valor <= 0 || !quantity || quantity <= 0) {
+            throw new Error('Valor e quantidade são obrigatórios e devem ser maiores que zero.');
         }
         if (!nome || !email || !cpf || !telefone) {
             throw new Error('Todos os campos são obrigatórios: nome, email, cpf e telefone.');
@@ -76,8 +76,8 @@ export async function POST(request: Request) {
                 {
                     "id": `PROD_${new Date().getTime()}`,
                     "title": "Produto Padrao",
-                    "quantity": 1,
-                    "unitPrice": valor_centavos,
+                    "quantity": quantity,
+                    "unitPrice": Math.round(valor_centavos / quantity),
                     "tangible": false
                 }
             ],
