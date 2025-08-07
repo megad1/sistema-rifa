@@ -139,7 +139,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
         <div className="p-2 space-y-2">
             <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
-                <div className="relative w-16 h-16 shrink-0">
+                <div className="relative w-24 h-16 shrink-0">
                     <Image
                         src="https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg"
                         alt="Prêmio"
