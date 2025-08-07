@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.54.0",
     "bootstrap-icons": "^1.13.1",
     "geist": "^1.4.2",
     "next": "15.4.5",
