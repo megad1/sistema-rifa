@@ -32,6 +32,7 @@ export async function POST(request: Request) {
       .from('compras')
       .select('id, created_at, quantidade_bilhetes, valor_total, status')
       .eq('cliente_id', cliente.id)
+      .eq('status', 'paid') // <-- AQUI ESTÁ A MUDANÇA
       .order('created_at', { ascending: false });
 
     if (comprasError) {

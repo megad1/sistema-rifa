@@ -111,7 +111,7 @@ const MeusTitulosPage = () => {
 
           {!isLoading && searched && compras.length === 0 && !error && (
             <div className="bg-yellow-100 text-yellow-800 p-3 rounded-md text-center text-sm">
-              Nenhuma compra encontrada para o CPF informado.
+              Nenhuma compra paga foi encontrada para o CPF informado.
             </div>
           )}
 
