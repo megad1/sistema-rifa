@@ -138,15 +138,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setIsLoading(false);
     }
   };
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Ocorreu um erro desconhecido.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
   
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
