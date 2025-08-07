@@ -127,9 +127,9 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const seconds = timeLeft % 60;
 
   return (
-    <div className={`fixed inset-0 bg-black/80 z-50 flex justify-center items-start p-4 overflow-y-auto ${inter.className}`}>
+    <div className={`fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4 overflow-y-auto ${inter.className}`}>
       {/* Aplicando o mesmo padrão de container da página */}
-      <div className="bg-gray-50 rounded-lg shadow-xl w-full max-w-lg mx-auto my-10" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-gray-50 rounded-lg shadow-xl w-full max-w-lg mx-auto" onClick={(e) => e.stopPropagation()}>
         <div className="relative text-center p-3 border-b border-gray-200">
           <h5 className="font-semibold text-gray-800">Checkout</h5>
           <button onClick={onClose} className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -143,7 +143,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             </div>
 
             {pixData ? (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[70vh] overflow-y-auto">
                 <div className="text-center p-2">
                     <p className="text-sm text-gray-600">Você tem <b className="text-red-500">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar</p>
                 </div>
@@ -210,7 +210,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             <form className="space-y-2" onSubmit={handlePayment}>
                 <div>
                     <label htmlFor="phone" className="block text-sm font-semibold text-gray-800 mb-1">Informe seu telefone</label>
-                    <input type="tel" id="phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent placeholder-gray-400 text-sm" placeholder="(00) 00000-0000" disabled={isLoading} />
+                    <input type="tel" id="phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="(00) 00000-0000" disabled={isLoading} />
                 </div>
 
                 {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
