@@ -28,12 +28,15 @@ export async function GET(request: Request) {
     const authString = `${secretKey}:x`;
     const authHeader = `Basic ${Buffer.from(authString).toString('base64')}`;
 
+    // A adição de { cache: 'no-store' } aqui é a correção crucial.
+    // Isso força o servidor da Vercel a não usar o cache para esta chamada fetch específica.
     const response = await fetch(`${SKALEPAY_API_URL}/transactions/${transactionId}`, {
       method: 'GET',
       headers: {
         'Authorization': authHeader,
         'Accept': 'application/json',
       },
+      cache: 'no-store' 
     });
 
     if (!response.ok) {
