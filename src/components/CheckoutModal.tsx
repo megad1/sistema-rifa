@@ -138,8 +138,18 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         </div>
 
         <div className="p-2 space-y-2">
-            <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600">
-                <b className="font-semibold text-gray-800">{quantity}</b> unidade(s) do produto <b className="font-semibold text-gray-800">EDIÇÃO 76 - NOVO TERA 2026 0KM</b>
+            <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
+                <div className="relative w-16 h-16 shrink-0">
+                    <Image
+                        src="https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg"
+                        alt="Prêmio"
+                        fill
+                        className="rounded-md object-cover"
+                    />
+                </div>
+                <p>
+                    <b className="font-semibold text-gray-800">{quantity}</b> unidade(s) do produto <b className="font-semibold text-gray-800">EDIÇÃO 76 - NOVO TERA 2026 0KM</b>
+                </p>
             </div>
 
             {pixData ? (
