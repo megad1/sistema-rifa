@@ -6,7 +6,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
-  throw new Error('Supabase URL, Anon Key or Service Role Key are not defined in .env.local');
+  throw new Error('Uma ou mais variáveis de ambiente do Supabase não foram definidas. Verifique a configuração no painel da Vercel ou no arquivo .env.local.');
 }
 
 // Cliente para uso no lado do cliente (client-side/browser)
