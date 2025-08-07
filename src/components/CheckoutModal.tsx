@@ -50,8 +50,64 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [paidAt, setPaidAt] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
+  
+  // --- Refs para lógica de polling ---
+  const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
 
+  
   // --- Funções de Manipulação de Eventos (com useCallback) ---
+  const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
+    if (!pixData?.token) return;
+
+    if (!isSilent) {
+        setIsVerifying(true);
+        setError(null);
+    }
+    
+    try {
+        const response = await fetch('/api/payment/status', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: pixData.token }),
+            cache: 'no-store' 
+        });
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+            if (!isSilent) throw new Error(data.message || 'Não foi possível verificar o pagamento.');
+            return; 
+        }
+
+        setPaymentStatus(data.status);
+
+        if (data.status === 'paid') {
+            setError(null);
+            if (data.titles && data.titles.length > 0) setTitles(data.titles);
+            if (data.data?.paidAt) {
+                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                });
+                setPaidAt(formattedDate);
+            }
+        } else {
+            if (!isSilent) setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
+        }
+    } catch (err: unknown) {
+        if (!isSilent) {
+            if (err instanceof Error) setError(err.message);
+            else setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
+        }
+    } finally {
+        if (!isSilent) setIsVerifying(false);
+    }
+  }, [pixData?.token]);
+
+  // Atualiza a ref com a última versão da função
+  useEffect(() => {
+    checkStatusCallbackRef.current = handleCheckPaymentStatus;
+  });
+
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     const { name, value } = e.target;
@@ -108,54 +164,10 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     }
   }, [formData, quantity]);
   
-  const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
-    if (!pixData?.token) return;
-    if (!isSilent) {
-      setIsVerifying(true);
-      setError(null);
-    }
-    try {
-        const uniqueUrl = `/api/payment/status?id=${pixData.token}&t=${new Date().getTime()}`;
-        const response = await fetch(uniqueUrl, { cache: 'no-store' });
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-            if (!isSilent) throw new Error(data.message || 'Não foi possível verificar o pagamento.');
-            return; 
-        }
-        setPaymentStatus(data.status);
-        if (data.status === 'paid') {
-            setError(null);
-            if (data.titles && data.titles.length > 0) setTitles(data.titles);
-            if (data.data?.paidAt) {
-                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit',
-                });
-                setPaidAt(formattedDate);
-            }
-        } else if (!isSilent) {
-            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
-        }
-    } catch (err: unknown) {
-        if (!isSilent) {
-            if (err instanceof Error) setError(err.message);
-            else setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
-        }
-    } finally {
-        if (!isSilent) setIsVerifying(false);
-    }
-  }, [pixData?.token]);
-  
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
     alert('Código PIX copiado para a área de transferência!');
   }, []);
-
-  // --- Refs ---
-  const checkStatusCallbackRef = useRef(handleCheckPaymentStatus);
-  useEffect(() => {
-    checkStatusCallbackRef.current = handleCheckPaymentStatus;
-  });
 
   // --- Efeitos (useEffect) ---
   useEffect(() => {
@@ -184,12 +196,18 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     }
   }, [pixData, timeLeft, paymentStatus]);
 
+  // Polling para verificação de pagamento automático
   useEffect(() => {
-    if (step === 3 && paymentStatus === 'pending' && timeLeft > 0) {
-      const interval = setInterval(() => checkStatusCallbackRef.current(true), 5000);
+    if (pixData && paymentStatus === 'pending' && timeLeft > 0) {
+      const interval = setInterval(() => {
+        // Usa a função da ref para garantir que está sempre chamando a última versão
+        checkStatusCallbackRef.current?.(true); // true para chamada "silenciosa"
+      }, 5000); // Verifica a cada 5 segundos
+
       return () => clearInterval(interval);
     }
-  }, [step, paymentStatus, timeLeft]);
+  }, [pixData, paymentStatus, timeLeft]);
+
 
   // --- Lógica de Renderização ---
   if (!isOpen) {
@@ -288,7 +306,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                         )}
                         {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
                         {paymentStatus === 'pending' && timeLeft > 0 && (
-                            <button onClick={() => handleCheckPaymentStatus()} disabled={isVerifying} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm transition-colors disabled:bg-green-800">
+                            <button onClick={() => handleCheckPaymentStatus(false)} disabled={isVerifying} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm transition-colors disabled:bg-green-800">
                                 {isVerifying ? (
                                     <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Verificando...</span></>
                                 ) : (

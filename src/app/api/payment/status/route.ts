@@ -1,75 +1,73 @@
+// src/app/api/payment/status/route.ts
 import { NextResponse } from 'next/server';
 
+// Forçar a rota a ser sempre dinâmica e nunca cacheada.
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // Nunca usar o cache para esta rota
-
-const SKALEPAY_API_URL = 'https://api.conta.skalepay.com.br/v1';
+export const revalidate = 0;
 
 /**
- * Endpoint para verificar o status de uma transação na SkalePay.
- * Recebe o ID da transação via query param.
+ * Gera números da sorte (títulos) únicos com 6 dígitos.
  */
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const transactionId = searchParams.get('id');
-
-    if (!transactionId) {
-      return new NextResponse(JSON.stringify({ success: false, message: 'ID da transação não fornecido.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+function generateTitles(quantity: number): string[] {
+    const titles = new Set<string>();
+    while (titles.size < quantity) {
+        const title = Math.floor(100000 + Math.random() * 900000).toString();
+        titles.add(title);
     }
+    return Array.from(titles);
+}
 
+// Alterado para POST para evitar o cache agressivo da Vercel em rotas GET.
+export async function POST(request: Request) {
     const secretKey = process.env.SKALEPLAY_SECRET_KEY;
     if (!secretKey) {
-      throw new Error('Chave secreta da API não configurada.');
+        return NextResponse.json({ success: false, message: 'Chave da API não configurada.' }, { status: 500 });
     }
 
-    const authString = `${secretKey}:x`;
-    const authHeader = `Basic ${Buffer.from(authString).toString('base64')}`;
-    
-    const response = await fetch(`${SKALEPAY_API_URL}/transactions/${transactionId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Accept': 'application/json',
-      },
-      cache: 'no-store' 
-    });
+    let transactionId: string | null = null;
+    try {
+        const body = await request.json();
+        transactionId = body.id;
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Erro ao consultar a API da SkalePay: HTTP ${response.status} - ${errorBody}`);
+        if (!transactionId) {
+            return NextResponse.json({ success: false, message: 'ID da transação não fornecido.' }, { status: 400 });
+        }
+    } catch (error) {
+        return NextResponse.json({ success: false, message: 'Corpo da requisição inválido.' }, { status: 400 });
     }
 
-    const result = await response.json();
-    const titles: string[] = [];
-    
-    if (result.status === 'paid' && result.items && result.items.length > 0) {
-      const quantity = result.items[0].quantity || 0;
-      for (let i = 0; i < quantity; i++) {
-        const title = Math.floor(100000 + Math.random() * 900000).toString();
-        titles.push(title);
-      }
-    }
-    
-    return NextResponse.json({
-      success: true,
-      status: result.status,
-      data: result,
-      titles: titles,
-    });
 
-  } catch (error) {
-    console.error("Erro ao verificar status do pagamento:", error);
-    let errorMessage = "Ocorreu um erro desconhecido.";
-    if (error instanceof Error) {
-        errorMessage = error.message;
+    try {
+        const authString = Buffer.from(`${secretKey}:`).toString('base64');
+
+        const response = await fetch(`https://api.skalepay.com/transactions/${transactionId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Basic ${authString}`,
+                'Content-Type': 'application/json',
+            },
+            // Adicionado para garantir que a Vercel não cacheie a resposta da API externa.
+            cache: 'no-store',
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error("Erro da API SkalePay:", errorData);
+            return NextResponse.json({ success: false, message: 'Erro ao consultar o status da transação na SkalePay.' }, { status: response.status });
+        }
+        
+        const data = await response.json();
+        let titles: string[] = [];
+
+        if (data.status === 'paid') {
+            const quantity = data.items.reduce((acc: number, item: any) => acc + item.quantity, 0);
+            titles = generateTitles(quantity > 0 ? quantity : 1);
+        }
+
+        return NextResponse.json({ success: true, status: data.status, data, titles });
+
+    } catch (error) {
+        console.error('Erro interno ao verificar status do pagamento:', error);
+        return NextResponse.json({ success: false, message: 'Erro interno no servidor.' }, { status: 500 });
     }
-    return new NextResponse(JSON.stringify({ success: false, message: errorMessage }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-    });
-  }
 }
