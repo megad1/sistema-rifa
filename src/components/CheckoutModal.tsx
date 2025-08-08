@@ -27,6 +27,7 @@ interface PixData {
 // --- Constantes e Funções de Utilitário ---
 const USE_WEBHOOK_ONLY = false; // Reativa polling automático junto com SSE e fallback manual
 const inter = Inter({ subsets: ["latin"] });
+const DEBUG_CHECKOUT = process.env.NEXT_PUBLIC_DEBUG_CHECKOUT === 'true';
 
 const formatCPF = (cpf: string) => {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.***.***-**');
@@ -65,6 +66,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [paidAt, setPaidAt] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
+  const [debugEnabled, setDebugEnabled] = useState(false);
   
   // --- Refs para lógica de polling ---
   const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
@@ -243,6 +245,13 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setTitles([]);
       setIsClientFound(false);
       setIsCheckingPhone(false);
+      // habilita debug por env ou query ?debug=1
+      try {
+        const isQueryDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === '1';
+        setDebugEnabled(Boolean(DEBUG_CHECKOUT || isQueryDebug));
+      } catch {
+        setDebugEnabled(Boolean(DEBUG_CHECKOUT));
+      }
     } else {
       document.body.classList.remove('modal-open');
     }
@@ -369,6 +378,25 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                         <div className="text-center p-2">
                             <p className="text-sm text-gray-600">Você tem <b className="text-red-500">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar</p>
                         </div>
+                        {debugEnabled && (
+                          <div className="text-center">
+                            <button
+                              onClick={() => {
+                                setPaymentStatus('paid');
+                                const gen = Array.from({ length: Math.max(1, quantity) }, () => (
+                                  Math.floor(100000 + Math.random() * 900000).toString()
+                                ));
+                                setTitles(gen);
+                                const now = new Date();
+                                setPaidAt(now.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+                              }}
+                              className="inline-flex items-center text-[11px] font-semibold text-blue-600 hover:text-blue-800"
+                            >
+                              <i className="bi bi-bug-fill mr-1"></i>
+                              Simular pagamento (debug)
+                            </button>
+                          </div>
+                        )}
                         <div className="text-center">
                             <button onClick={() => setShowQr(!showQr)} className="text-sm text-gray-600 font-semibold hover:text-black">
                                 <i className={`bi ${showQr ? 'bi-eye-slash' : 'bi-qr-code'}`}></i>
