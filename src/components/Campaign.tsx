@@ -1,26 +1,9 @@
 // src/components/Campaign.tsx
-import { useEffect, useState } from 'react';
-import { getCampaignSettings } from '@/lib/campaign';
-
-interface CampaignSettings {
+interface CampaignProps {
   title: string;
-  imageUrl: string;
 }
 
-const Campaign = () => {
-  const [settings, setSettings] = useState<CampaignSettings | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const s = await getCampaignSettings();
-        setSettings(s);
-      } catch {}
-    })();
-  }, []);
-
-  const title = settings?.title ?? 'EDIÇÃO 76 - NOVO TERA 2026 0KM';
-
+const Campaign = ({ title }: CampaignProps) => {
   return (
     <section className="text-white text-left">
       <div className="space-y-1">
