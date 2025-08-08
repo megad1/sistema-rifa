@@ -7,7 +7,13 @@ export interface ProcessPaymentResult {
   raw?: unknown;
 }
 
-export async function getSkalePayTransactionStatus(transactionId: string): Promise<any> {
+export interface SkalePayTransactionStatus {
+  id: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+export async function getSkalePayTransactionStatus(transactionId: string): Promise<SkalePayTransactionStatus> {
   const secretKey = process.env.SKALEPLAY_SECRET_KEY;
   if (!secretKey) {
     throw new Error('Chave da API não configurada.');
@@ -32,7 +38,7 @@ export async function getSkalePayTransactionStatus(transactionId: string): Promi
     throw new Error('Erro ao consultar o status da transação na SkalePay.');
   }
 
-  return await response.json();
+  return (await response.json()) as SkalePayTransactionStatus;
 }
 
 function generateTitles(quantity: number, avoid: Set<string> = new Set()): string[] {
