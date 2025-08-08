@@ -77,7 +77,7 @@ export async function GET(request: Request) {
             // Status ainda pendente
             send(sseFormat({ success: true, status: compra.status }, 'status'));
           }
-        } catch (_e) {
+        } catch {
           send(sseFormat({ success: false, message: 'internal error' }, 'error'));
         }
 
@@ -99,7 +99,6 @@ export async function GET(request: Request) {
           controller.close();
         }
       };
-      // @ts-expect-error signal exists em Request
       request.signal?.addEventListener('abort', abort);
     },
     cancel() {
