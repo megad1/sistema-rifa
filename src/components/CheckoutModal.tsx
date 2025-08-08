@@ -25,14 +25,27 @@ interface PixData {
 }
 
 // --- Constantes e Funções de Utilitário ---
-const USE_WEBHOOK_ONLY = true;
+const USE_WEBHOOK_ONLY = false; // Reativa polling automático junto com SSE e fallback manual
 const inter = Inter({ subsets: ["latin"] });
 
 const formatCPF = (cpf: string) => {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.***.***-**');
 };
 const formatPhone = (phone: string) => {
-    return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) *****-**$3');
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 4) return phone;
+    const ddd = digits.slice(0, 2);
+    const last4 = digits.slice(-4);
+    // 11+ dígitos (celular com nono dígito): (DD) *****-**1234
+    if (digits.length >= 11) {
+      return `(${ddd}) *****-**${last4}`;
+    }
+    // 10 dígitos (fixo): (DD) ****-**1234
+    if (digits.length === 10) {
+      return `(${ddd}) ****-**${last4}`;
+    }
+    // Outros comprimentos (fallback): mascarar de forma conservadora
+    return `(${ddd}) ****-**${last4}`;
 };
 
 const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
