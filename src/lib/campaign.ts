@@ -9,6 +9,8 @@ const DEFAULT_SETTINGS: CampaignSettings = {
 };
 
 import { supabaseAdmin } from '@/lib/supabase';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function getCampaignSettings(): Promise<CampaignSettings> {
   try {

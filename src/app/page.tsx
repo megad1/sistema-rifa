@@ -8,6 +8,9 @@ import Regulation from "@/components/Regulation";
 import Footer from "@/components/Footer";
 import { getCampaignSettings } from "@/lib/campaign";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function Home() {
   const settings = await getCampaignSettings();
   const banner = settings.imageUrl;
