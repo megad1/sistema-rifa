@@ -112,8 +112,9 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                 setPaidAt(formattedDate);
             }
             try {
-              if ((data.fb?.enabled && data.fb?.sendPurchase && data.fb?.pixelId) && (window as any).fbq) {
-                (window as any).fbq('track', 'Purchase', { value: pixData?.valor ?? 0, currency: 'BRL' });
+              const w = window as unknown as { fbq?: (event: string, name: string, params?: Record<string, unknown>) => void };
+              if ((data.fb?.enabled && data.fb?.sendPurchase && data.fb?.pixelId) && w.fbq) {
+                w.fbq('track', 'Purchase', { value: pixData?.valor ?? 0, currency: 'BRL' });
               }
             } catch {}
         } else {
@@ -222,8 +223,9 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setStep(3);
       setShowQr(window.innerWidth >= 768);
       try {
-        if ((data.fb?.enabled && data.fb?.pixelId) && (window as any).fbq) {
-          (window as any).fbq('track', 'InitiateCheckout', { value: data.valor, currency: 'BRL' });
+        const w = window as unknown as { fbq?: (event: string, name: string, params?: Record<string, unknown>) => void };
+        if ((data.fb?.enabled && data.fb?.pixelId) && w.fbq) {
+          w.fbq('track', 'InitiateCheckout', { value: data.valor, currency: 'BRL' });
         }
       } catch {}
     } catch (err: unknown) {

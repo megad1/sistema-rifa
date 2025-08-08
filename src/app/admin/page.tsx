@@ -97,9 +97,10 @@ export default function AdminPage() {
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-1">URL da Imagem</label>
                   <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                  {imageUrl && (
-                    <img src={imageUrl} alt="preview" className="mt-2 rounded-md border max-h-40 object-cover" />
-                  )}
+              {imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover" />
+              )}
                 </div>
                 <div className="border-t pt-3">
                   <h2 className="text-md font-bold text-gray-800 mb-2">Facebook Pixel / CAPI</h2>

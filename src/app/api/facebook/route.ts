@@ -11,8 +11,9 @@ export async function GET() {
       .select('value')
       .eq('id', 'facebook')
       .single();
-    return NextResponse.json({ success: true, settings: (data as any)?.value || {} });
-  } catch (e) {
+    const settings = (data?.value ?? {}) as Record<string, unknown>;
+    return NextResponse.json({ success: true, settings });
+  } catch {
     return NextResponse.json({ success: true, settings: {} });
   }
 }
