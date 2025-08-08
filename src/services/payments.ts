@@ -163,23 +163,37 @@ export interface SkalePayWebhookPayload {
 }
 
 export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookPayload): Promise<ProcessPaymentResult> {
-  const candidateId = payload?.data?.secureId || payload?.secureId || payload?.transactionId || payload?.transaction_id || payload?.id || payload?.data?.id;
-  const transactionId = typeof candidateId === 'number' ? String(candidateId) : candidateId;
-  if (!transactionId) {
+  // A SkalePay envia tanto um id numérico (data.id) quanto um secureId (data.secureId)
+  const numericId = payload?.data?.id ?? payload?.id;
+  const secureId = payload?.data?.secureId ?? payload?.secureId ?? payload?.transactionId ?? payload?.transaction_id;
+
+  const candidateIds: string[] = [];
+  if (numericId !== undefined && numericId !== null) candidateIds.push(String(numericId));
+  if (secureId) candidateIds.push(String(secureId));
+  if (candidateIds.length === 0) {
     throw new Error('Webhook sem transaction id.');
   }
 
   const skalePayStatus = (payload?.data?.status || payload?.status || '').toString().toLowerCase();
 
-  // 2) Compra no nosso banco
-  const { data: compra, error: compraError } = await supabaseAdmin
-    .from('compras')
-    .select('*')
-    .eq('transaction_id', transactionId)
-    .single();
+  // 2) Tenta localizar a compra por qualquer um dos IDs candidatos (prioriza o numérico, que é o salvo no create)
+  let compra: any = null;
+  let lastError: unknown = null;
+  for (const candidate of candidateIds) {
+    const { data, error } = await supabaseAdmin
+      .from('compras')
+      .select('*')
+      .eq('transaction_id', candidate)
+      .single();
+    if (!error && data) {
+      compra = data;
+      break;
+    }
+    lastError = error;
+  }
 
-  if (compraError || !compra) {
-    console.error('Compra não encontrada no banco de dados (webhook):', compraError, 'transaction_id:', transactionId);
+  if (!compra) {
+    console.error('Compra não encontrada no banco de dados (webhook):', lastError, 'candidates:', candidateIds);
     throw new Error('Compra não encontrada no sistema.');
   }
 
