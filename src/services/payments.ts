@@ -177,7 +177,11 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
   const skalePayStatus = (payload?.data?.status || payload?.status || '').toString().toLowerCase();
 
   // 2) Tenta localizar a compra por qualquer um dos IDs candidatos (prioriza o numérico, que é o salvo no create)
-  let compra: any = null;
+  let compra: {
+    id: string;
+    quantidade_bilhetes: number;
+    status: 'pending' | 'paid' | string;
+  } | null = null;
   let lastError: unknown = null;
   for (const candidate of candidateIds) {
     const { data, error } = await supabaseAdmin

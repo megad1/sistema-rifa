@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { processPaymentConfirmation, processPaymentFromWebhookPayload } from '@/services/payments';
+import { processPaymentFromWebhookPayload } from '@/services/payments';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
