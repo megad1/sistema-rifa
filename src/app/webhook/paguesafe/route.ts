@@ -25,6 +25,7 @@ async function validateSignature(req: Request): Promise<boolean> {
 export async function POST(request: Request) {
   try {
     const requireAuth = process.env.WEBHOOK_REQUIRE_AUTH !== 'false';
+    const expectedToken = process.env.WEBHOOK_TOKEN || '';
 
     // Logging opcional do webhook
     if (process.env.LOG_WEBHOOKS === 'true') {
@@ -32,7 +33,12 @@ export async function POST(request: Request) {
         const raw = await request.clone().text();
         const headers: Record<string, string> = {};
         request.headers.forEach((v, k) => {
-          headers[k] = k.toLowerCase() === 'authorization' ? '[redacted]' : v;
+          const lower = k.toLowerCase();
+          if (lower === 'authorization' || lower === 'x-webhook-token') {
+            headers[k] = '[redacted]';
+          } else {
+            headers[k] = v;
+          }
         });
         console.log('[WEBHOOK] headers:', headers);
         console.log('[WEBHOOK] body:', raw?.slice(0, 2000));
@@ -45,6 +51,17 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get('authorization');
     if (requireAuth && !isAuthorizedBasic(authHeader)) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 1.1) Token obrigatório (se configurado)
+    if (expectedToken) {
+      const url = new URL(request.url);
+      const qsToken = url.searchParams.get('t');
+      const headerToken = request.headers.get('x-webhook-token');
+      const providedToken = headerToken ?? qsToken ?? '';
+      if (providedToken !== expectedToken) {
+        return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 401 });
+      }
     }
 
     // 2) (Opcional) assinatura/HMAC
