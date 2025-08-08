@@ -369,9 +369,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                         </div>
                         <h3 className="text-base font-bold text-gray-800">Pagamento confirmado</h3>
                         <p className="text-xs text-gray-600">Seu pagamento foi aprovado. Os títulos aparecem abaixo nos detalhes.</p>
-                        {paidAt && (
-                          <p className="text-[11px] text-gray-500">Confirmado em: {paidAt}</p>
-                        )}
+                        {/* Removido "Confirmado em" conforme solicitação */}
                     </div>
                 ) : (
                     <>
