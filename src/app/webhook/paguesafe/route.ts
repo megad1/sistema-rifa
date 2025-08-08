@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { processPaymentConfirmation } from '@/services/payments';
+import { processPaymentConfirmation, processPaymentFromWebhookPayload } from '@/services/payments';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -55,14 +55,8 @@ export async function POST(request: Request) {
 
     // 3) Corpo do postback
     const body = await request.json();
-    // Tentativas comuns de campo de ID
-    const transactionId: string | undefined = body?.id || body?.transactionId || body?.transaction_id || body?.data?.id || body?.payload?.id;
-    if (!transactionId) {
-      return NextResponse.json({ success: false, message: 'Missing transaction id' }, { status: 400 });
-    }
-
-    // 4) Processar confirmação de pagamento (idempotente)
-    const result = await processPaymentConfirmation(transactionId);
+    // Preferir processamento direto do payload (usa status e secureId/id do corpo)
+    const result = await processPaymentFromWebhookPayload(body);
 
     return NextResponse.json({ success: true, status: result.status, titles: result.titles });
   } catch (error) {
