@@ -4,18 +4,14 @@ import { getCampaignSettings } from '@/lib/campaign';
 
 export type UtmifySettings = {
   enabled: boolean;
-  sendPending: boolean;
-  sendPaid: boolean;
-  apiUrl: string;
   token: string;
   platform: string; // ex.: 'rifa-system'
 };
 
+const UTMIFY_API_URL = 'https://api.utmify.com.br/api-credentials/orders';
+
 export const DEFAULT_UTMIFY: UtmifySettings = {
   enabled: false,
-  sendPending: true,
-  sendPaid: true,
-  apiUrl: 'https://api.utmify.com.br/api-credentials/orders',
   token: '',
   platform: 'rifa-system',
 };
@@ -52,7 +48,7 @@ function toUtcSqlDate(date: Date): string {
 
 export async function postUtmifyOrder(common: CommonPayload) {
   const settings = await getUtmifySettings();
-  if (!settings.enabled || !settings.token || !settings.apiUrl) {
+  if (!settings.enabled || !settings.token) {
     console.log('[UTMIFY] Skip: disabled or missing token/apiUrl');
     return;
   }
@@ -95,7 +91,7 @@ export async function postUtmifyOrder(common: CommonPayload) {
   };
 
   try {
-    const res = await fetch(settings.apiUrl, {
+    const res = await fetch(UTMIFY_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -104,7 +100,7 @@ export async function postUtmifyOrder(common: CommonPayload) {
       body: JSON.stringify(payload),
     });
     const txt = await res.text();
-    console.log('[UTMIFY] POST', settings.apiUrl, res.status, txt);
+    console.log('[UTMIFY] POST', UTMIFY_API_URL, res.status, txt);
   } catch (e) {
     console.error('[UTMIFY] error', e);
   }

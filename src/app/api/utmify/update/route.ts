@@ -15,9 +15,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const payload = {
       enabled: Boolean(body?.enabled),
-      sendPending: Boolean(body?.sendPending),
-      sendPaid: Boolean(body?.sendPaid),
-      apiUrl: String(body?.apiUrl || 'https://api.utmify.com.br/api-credentials/orders'),
       token: String(body?.token || ''),
       platform: String(body?.platform || 'rifa-system'),
     };

@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 
     // Utmify: quando pago
     const utm = await getUtmifySettings();
-    if (utm.enabled && utm.sendPaid && result.status === 'paid') {
+    if (utm.enabled && result.status === 'paid') {
       try {
         const customer = body?.data?.customer;
         const amountInCents = body?.data?.paidAmount ?? body?.data?.amount;

@@ -32,9 +32,6 @@ export default function AdminPage() {
   const [fbPixelId, setFbPixelId] = useState('');
   const [fbCapiToken, setFbCapiToken] = useState('');
   const [utmEnabled, setUtmEnabled] = useState(false);
-  const [utmSendPending, setUtmSendPending] = useState(true);
-  const [utmSendPaid, setUtmSendPaid] = useState(true);
-  const [utmApiUrl, setUtmApiUrl] = useState('https://api.utmify.com.br/api-credentials/orders');
   const [utmToken, setUtmToken] = useState('');
 
   useEffect(() => {
@@ -56,9 +53,6 @@ export default function AdminPage() {
         const utm = await fetch('/api/utmify', { cache: 'no-store' }).then(r => r.json());
         if (utm?.success) {
           setUtmEnabled(Boolean(utm.settings?.enabled));
-          setUtmSendPending(Boolean(utm.settings?.sendPending));
-          setUtmSendPaid(Boolean(utm.settings?.sendPaid));
-          setUtmApiUrl(String(utm.settings?.apiUrl || 'https://api.utmify.com.br/api-credentials/orders'));
           setUtmToken(String(utm.settings?.token || ''));
         }
       } catch {}
@@ -97,7 +91,7 @@ export default function AdminPage() {
       if (!jsonFb.success) throw new Error(jsonFb.message || 'Falha ao salvar Facebook');
       const resUtm = await fetch('/api/utmify/update', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: utmEnabled, sendPending: utmSendPending, sendPaid: utmSendPaid, apiUrl: utmApiUrl, token: utmToken, platform: 'rifa-system' }),
+        body: JSON.stringify({ enabled: utmEnabled, token: utmToken, platform: 'rifa-system' }),
       });
       const jsonUtm = await resUtm.json();
       if (!jsonUtm.success) throw new Error(jsonUtm.message || 'Falha ao salvar Utmify');
@@ -184,34 +178,14 @@ export default function AdminPage() {
 
                 <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
                   <h2 className="text-lg font-bold text-gray-800 mb-4">Utmify</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-800">Ativar Utmify</p>
-                        <p className="text-xs text-gray-500">Liga/desliga o envio para a Utmify</p>
-                      </div>
-                      <ToggleSwitch checked={utmEnabled} onChange={setUtmEnabled} label="Ativar Utmify" />
+                  <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Ativar Utmify</p>
+                      <p className="text-xs text-gray-500">Quando ativo, envia pending e paid automaticamente</p>
                     </div>
-                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-800">Enviar Pending</p>
-                        <p className="text-xs text-gray-500">Envia waiting_payment quando gerar Pix</p>
-                      </div>
-                      <ToggleSwitch checked={utmSendPending} onChange={setUtmSendPending} label="Enviar Pending" />
-                    </div>
-                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-800">Enviar Paid</p>
-                        <p className="text-xs text-gray-500">Envia paid quando confirmado</p>
-                      </div>
-                      <ToggleSwitch checked={utmSendPaid} onChange={setUtmSendPaid} label="Enviar Paid" />
-                    </div>
+                    <ToggleSwitch checked={utmEnabled} onChange={setUtmEnabled} label="Ativar Utmify" />
                   </div>
                   <div className="mt-4 grid grid-cols-1 gap-3">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">API URL</label>
-                      <input value={utmApiUrl} onChange={(e) => setUtmApiUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                    </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-800 mb-1">Token</label>
                       <input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />

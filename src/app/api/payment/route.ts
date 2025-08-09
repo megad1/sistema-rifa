@@ -123,7 +123,7 @@ export async function POST(request: Request) {
         // Envia Purchase para o Pixel (browser) via fbq em client já acontece com PageView. Para CAPI, enviaremos servidor → Facebook se ativado.
 
         // Disparo Utmify (waiting_payment)
-        if (utm.enabled && utm.sendPending) {
+        if (utm.enabled) {
             try {
                 await postUtmifyOrder({
                     orderId: resultSkalePay.id,
