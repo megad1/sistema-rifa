@@ -9,7 +9,7 @@ import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { nome, email, cpf, telefone, quantity } = body;
+        const { nome, email, cpf, telefone, quantity, trackingParameters } = body as any;
 
         // --- Validação de Entrada ---
         if (!quantity || typeof quantity !== 'number' || quantity <= 0) {
@@ -105,7 +105,8 @@ export async function POST(request: Request) {
                 transaction_id: resultSkalePay.id,
                 quantidade_bilhetes: quantity,
                 valor_total: valor,
-                status: 'pending' // Status inicial
+                status: 'pending', // Status inicial
+                tracking_parameters: trackingParameters ?? null
             });
 
         if (compraError) {
@@ -134,7 +135,7 @@ export async function POST(request: Request) {
                     customer: { name: nome, email, document: cpf_limpo },
                     quantity: quantity,
                     totalValue: valor,
-                });
+                }, trackingParameters || undefined);
             } catch (e) { console.error('[UTMIFY] pending error', e); }
         }
 

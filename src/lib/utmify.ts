@@ -46,7 +46,26 @@ function toUtcSqlDate(date: Date): string {
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
 }
 
-export async function postUtmifyOrder(common: CommonPayload) {
+type Tracking = {
+  src: string | null;
+  sck: string | null;
+  utm_source: string | null;
+  utm_campaign: string | null;
+  utm_medium: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
+  xcod: string | null;
+  fbclid: string | null;
+  gclid: string | null;
+  ttclid: string | null;
+};
+
+const DEFAULT_TRACKING: Tracking = {
+  src: null, sck: null, utm_source: null, utm_campaign: null, utm_medium: null, utm_content: null, utm_term: null,
+  xcod: null, fbclid: null, gclid: null, ttclid: null,
+};
+
+export async function postUtmifyOrder(common: CommonPayload, tracking?: Partial<Tracking>) {
   const settings = await getUtmifySettings();
   if (!settings.enabled || !settings.token) {
     console.log('[UTMIFY] Skip: disabled or missing token/apiUrl');
@@ -55,6 +74,7 @@ export async function postUtmifyOrder(common: CommonPayload) {
   const campaign = await getCampaignSettings();
   const priceInCents = Math.round(TICKET_PRICE * 100);
   const totalInCents = Math.round(common.totalValue * 100);
+  const trackingParams: Tracking = { ...DEFAULT_TRACKING, ...(tracking || {}) };
   const payload = {
     orderId: common.orderId,
     platform: settings.platform || 'rifa-system',
@@ -81,7 +101,7 @@ export async function postUtmifyOrder(common: CommonPayload) {
         priceInCents: priceInCents,
       },
     ],
-    trackingParameters: {},
+    trackingParameters: trackingParams,
     commission: {
       totalPriceInCents: totalInCents,
       gatewayFeeInCents: 0,

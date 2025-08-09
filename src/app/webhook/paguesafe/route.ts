@@ -85,6 +85,16 @@ export async function POST(request: Request) {
         const quantity = body?.data?.items?.[0]?.quantity ?? 1;
         const totalValue = typeof amountInCents === 'number' ? amountInCents / 100 : 0;
         const paidAt = body?.data?.paidAt ? new Date(body.data.paidAt) : new Date();
+        // Recupera tracking salvo na compra
+        let tracking = undefined as any;
+        try {
+          const { data: compraData } = await supabaseAdmin
+            .from('compras')
+            .select('tracking_parameters')
+            .eq('transaction_id', String(body?.data?.id ?? body?.id ?? result.transactionIdUsed ?? ''))
+            .single();
+          tracking = compraData?.tracking_parameters || undefined;
+        } catch {}
         await postUtmifyOrder({
           orderId: String(body?.data?.id ?? body?.id ?? result.transactionIdUsed ?? ''),
           status: 'paid',
@@ -94,7 +104,7 @@ export async function POST(request: Request) {
           customer: { name: customer?.name ?? '', email: customer?.email ?? '', document: customer?.document?.number ?? '' },
           quantity,
           totalValue,
-        });
+        }, tracking);
       } catch (e) { console.error('[UTMIFY] paid error', e); }
     }
 

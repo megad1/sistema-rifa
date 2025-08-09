@@ -67,6 +67,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [paidAt, setPaidAt] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
   const [debugEnabled, setDebugEnabled] = useState(false);
+  const [tracking, setTracking] = useState<{ [k: string]: string | null }>({});
   
   // --- Refs para lógica de polling ---
   const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
@@ -214,7 +215,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           quantity: quantity,
-          ...formData
+          ...formData,
+          trackingParameters: tracking
         }),
       });
       const data = await response.json();
@@ -264,6 +266,15 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       } catch {
         setDebugEnabled(Boolean(DEBUG_CHECKOUT));
       }
+      try {
+        const q = new URLSearchParams(window.location.search);
+        const get = (k: string) => (q.get(k) ?? null);
+        setTracking({
+          src: get('src'), sck: get('sck'),
+          utm_source: get('utm_source'), utm_campaign: get('utm_campaign'), utm_medium: get('utm_medium'), utm_content: get('utm_content'), utm_term: get('utm_term'),
+          xcod: get('xcod'), fbclid: get('fbclid'), gclid: get('gclid'), ttclid: get('ttclid'),
+        });
+      } catch {}
     } else {
       document.body.classList.remove('modal-open');
     }
