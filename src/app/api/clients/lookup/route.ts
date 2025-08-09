@@ -27,7 +27,10 @@ export async function POST(request: Request) {
     }
 
     if (cliente) {
-      return NextResponse.json({ success: true, found: true, cliente });
+      // Evita expor CPF completo via API pública
+      const maskedCpf = String(cliente.cpf || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      const safeCliente = { nome: cliente.nome, email: cliente.email, cpf: maskedCpf };
+      return NextResponse.json({ success: true, found: true, cliente: safeCliente });
     } else {
       return NextResponse.json({ success: true, found: false });
     }

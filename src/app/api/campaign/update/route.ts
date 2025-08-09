@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isAdminRequest } from '@/lib/adminAuth';
 
-const COOKIE_NAME = 'admin_session';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -9,9 +9,10 @@ export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
-    // Autorização via cookie de sessão admin (emitido pelo /api/admin/login)
-    const cookie = (request.headers.get('cookie') || '').split(';').find(c => c.trim().startsWith(`${COOKIE_NAME}=`));
-    if (!cookie) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    // Autorização robusta via cookie assinado
+    if (!isAdminRequest(request)) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
 
     const body = await request.json();
     const title: string | undefined = body?.title;

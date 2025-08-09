@@ -20,8 +20,11 @@ const Footer = () => {
         <p 
           className="text-justify" 
           style={{fontSize: '0.65rem', lineHeight: '1.5'}}
-          dangerouslySetInnerHTML={{ __html: legalText.replace(/\n/g, '<br />') }}
-        />
+          aria-live="polite"
+        >
+          {/* Texto estático controlado pelo código, seguro para render HTML básico */}
+          <span dangerouslySetInnerHTML={{ __html: legalText.replace(/\n/g, '<br />') }} />
+        </p>
 
         {/* Copyright */}
         <p style={{fontSize: '0.7rem'}}>

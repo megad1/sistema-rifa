@@ -35,7 +35,7 @@ export default async function RootLayout({
               fbq('init', '${fb.pixelId}');
               fbq('track','PageView');
             `}</Script>
-            <noscript dangerouslySetInnerHTML={{ __html: `<img height=\"1\" width=\"1\" style=\"display:none\" src=\"https://www.facebook.com/tr?id=${fb.pixelId}&ev=PageView&noscript=1\" alt=\"\" />` }} />
+            <noscript dangerouslySetInnerHTML={{ __html: `<img height=\"1\" width=\"1\" style=\"display:none\" src=\"https://www.facebook.com/tr?id=${fb.pixelId}&ev=PageView&noscript=1\" alt=\"\" referrerpolicy=\"no-referrer-when-downgrade\" />` }} />
           </>
         )}
       </head>
@@ -46,12 +46,10 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              document.addEventListener('gesturestart', function (e) {
-                e.preventDefault();
-              });
-              document.addEventListener('dblclick', function (e) {
-                e.preventDefault();
-              });
+              try {
+                document.addEventListener('gesturestart', function (e) { e.preventDefault(); }, { passive: false });
+                document.addEventListener('dblclick', function (e) { e.preventDefault(); });
+              } catch {}
             `,
           }}
         />

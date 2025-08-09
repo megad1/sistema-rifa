@@ -30,9 +30,12 @@ const Regulation = () => {
       </button>
       {isOpen && (
         <div 
-          className="text-xs text-gray-600 space-y-2 mt-2 border-t pt-2 overflow-y-auto max-h-40" // Adicionado overflow e altura máxima
-          dangerouslySetInnerHTML={{ __html: regulationHTML }}
-        />
+          className="text-xs text-gray-600 space-y-2 mt-2 border-t pt-2 overflow-y-auto max-h-40"
+          aria-live="polite"
+        >
+          {/* Conteúdo estático controlado localmente, sem entrada do usuário */}
+          <div dangerouslySetInnerHTML={{ __html: regulationHTML }} />
+        </div>
       )}
     </section>
   );

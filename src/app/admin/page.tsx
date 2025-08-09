@@ -45,17 +45,26 @@ export default function AdminPage() {
           setTitle(json.settings.title || '');
           setImageUrl(json.settings.imageUrl || '');
         }
-        const fb = await fetch('/api/facebook', { cache: 'no-store' }).then(r => r.json());
-        if (fb?.success) {
-          setFbEnabled(Boolean(fb.settings?.enabled));
-          setFbSendPurchase(Boolean(fb.settings?.sendPurchase));
-          setFbPixelId(String(fb.settings?.pixelId || ''));
-          setFbCapiToken(String(fb.settings?.capiToken || ''));
+        // Só tenta buscar integrações se já autenticado
+        const cookieHasAdmin = document.cookie.includes('__Host-admin_session=');
+        if (!cookieHasAdmin) return;
+        const fbRes = await fetch('/api/facebook', { cache: 'no-store' });
+        if (fbRes.ok) {
+          const fb = await fbRes.json();
+          if (fb?.success) {
+            setFbEnabled(Boolean(fb.settings?.enabled));
+            setFbSendPurchase(Boolean(fb.settings?.sendPurchase));
+            setFbPixelId(String(fb.settings?.pixelId || ''));
+            setFbCapiToken(String(fb.settings?.capiToken || ''));
+          }
         }
-        const utm = await fetch('/api/utmify', { cache: 'no-store' }).then(r => r.json());
-        if (utm?.success) {
-          setUtmEnabled(Boolean(utm.settings?.enabled));
-          setUtmToken(String(utm.settings?.token || ''));
+        const utmRes = await fetch('/api/utmify', { cache: 'no-store' });
+        if (utmRes.ok) {
+          const utm = await utmRes.json();
+          if (utm?.success) {
+            setUtmEnabled(Boolean(utm.settings?.enabled));
+            setUtmToken(String(utm.settings?.token || ''));
+          }
         }
       } catch {}
     })();
@@ -70,6 +79,29 @@ export default function AdminPage() {
     const json = await res.json();
     if (!json.success) { setLoginError(json.message || 'Falha no login'); return; }
     setIsAuthed(true);
+    // Após autenticar, carrega integrações
+    try {
+      const [fbRes, utmRes] = await Promise.all([
+        fetch('/api/facebook', { cache: 'no-store' }),
+        fetch('/api/utmify', { cache: 'no-store' }),
+      ]);
+      if (fbRes.ok) {
+        const fb = await fbRes.json();
+        if (fb?.success) {
+          setFbEnabled(Boolean(fb.settings?.enabled));
+          setFbSendPurchase(Boolean(fb.settings?.sendPurchase));
+          setFbPixelId(String(fb.settings?.pixelId || ''));
+          setFbCapiToken(String(fb.settings?.capiToken || ''));
+        }
+      }
+      if (utmRes.ok) {
+        const utm = await utmRes.json();
+        if (utm?.success) {
+          setUtmEnabled(Boolean(utm.settings?.enabled));
+          setUtmToken(String(utm.settings?.token || ''));
+        }
+      }
+    } catch {}
   };
 
   const handleSave = async (e: React.FormEvent) => {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isAdminRequest } from '@/lib/adminAuth';
 
 const COOKIE_NAME = 'admin_session';
 
@@ -9,8 +10,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
-    const cookie = (request.headers.get('cookie') || '').split(';').find(c => c.trim().startsWith(`${COOKIE_NAME}=`));
-    if (!cookie) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    if (!isAdminRequest(request)) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
     const payload = {

@@ -17,11 +17,10 @@ function isAuthorizedBasic(authHeader: string | null): boolean {
 
 // Placeholder para validação de assinatura/HMAC caso a SkalePay envie
 async function validateSignature(req: Request): Promise<boolean> {
-  // Ex.: cabeçalhos de assinatura (quando houver formato definido)
-  if (req.headers.get('x-skalepay-signature') || req.headers.get('x-signature')) {
-    // TODO: Validar com crypto/HMAC quando a SkalePay documentar o formato
-  }
-  return true;
+  const requireSig = process.env.WEBHOOK_REQUIRE_SIGNATURE === 'true';
+  if (!requireSig) return true;
+  // Quando a SkalePay documentar o formato de assinatura, validar cabeçalhos aqui
+  return false;
 }
 
 export async function POST(request: Request) {

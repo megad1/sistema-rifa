@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const runtime = 'nodejs';
 
-const COOKIE_NAME = 'admin_session';
+import { createAdminSessionToken, ADMIN_COOKIE_NAME } from '@/lib/adminAuth';
 
 export async function POST(request: Request) {
   try {
@@ -21,13 +21,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Credenciais inválidas' }, { status: 401 });
     }
 
+    const tokenValue = createAdminSessionToken(60 * 60 * 12);
     const res = NextResponse.json({ success: true });
-    res.cookies.set(COOKIE_NAME, 'valid', {
+    res.cookies.set(ADMIN_COOKIE_NAME, tokenValue, {
       httpOnly: true,
       sameSite: 'strict',
       secure: true,
       path: '/',
-      maxAge: 60 * 60 * 12, // 12h
+      maxAge: 60 * 60 * 12,
+      priority: 'high',
     });
     return res;
   } catch (e) {
