@@ -1,11 +1,25 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+type WinwheelSegment = { text?: string };
+
+interface WinwheelInstance {
+  outerRadius: number;
+  stopAnimation: (canComplete?: boolean) => void;
+  rotationAngle: number;
+  draw: () => void;
+  startAnimation: () => void;
+  getIndicatedSegment?: () => WinwheelSegment | null;
+  wheelImage?: HTMLImageElement | HTMLCanvasElement;
+}
+
+type WinwheelCtor = new (config: Record<string, unknown>) => WinwheelInstance;
 
 declare global {
   interface Window {
-    Winwheel?: any;
-    TweenMax?: any;
+    Winwheel?: WinwheelCtor;
+    TweenMax?: unknown;
   }
 }
 
@@ -46,7 +60,7 @@ export default function WinwheelRoulette({
   onFinished,
 }: WinwheelRouletteProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const wheelInstanceRef = useRef<any>(null);
+  const wheelInstanceRef = useRef<WinwheelInstance | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState<string>('');
@@ -59,7 +73,7 @@ export default function WinwheelRoulette({
       if (!canvasRef.current) return;
       if (typeof window === 'undefined') return;
       if (!window.Winwheel) return;
-      if (!(window as any).TweenMax) return; // GSAP v2 necessário
+      if (typeof window.TweenMax === 'undefined') return; // GSAP v2 necessário
       if (wheelInstanceRef.current) return; // já inicializado
 
       // Cria segmentos apenas para fins de lógica/resultado
@@ -148,7 +162,17 @@ export default function WinwheelRoulette({
       wheelInstanceRef.current = null;
       setReady(false);
     };
-  }, []);
+  }, [
+    angleOffsetDeg,
+    durationSec,
+    imageFitScale,
+    imageSrc,
+    paddingPx,
+    segmentLabels,
+    spins,
+    wheelSizePx,
+    onFinished,
+  ]);
 
   const handleSpin = () => {
     if (!wheelInstanceRef.current || isSpinning || !ready || !imageLoaded || disabled) return;
