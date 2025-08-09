@@ -184,7 +184,7 @@ export default function WinwheelRoulette({
     // Reset opcional para permitir giros múltiplos
     try {
       wheelInstanceRef.current.stopAnimation(false);
-      wheelInstanceRef.current.rotationAngle = angleOffsetDeg;
+      // não resetamos mais o ângulo; iniciamos do ângulo atual para evitar "snap back"
       wheelInstanceRef.current.draw();
     } catch {}
 
@@ -208,7 +208,7 @@ export default function WinwheelRoulette({
 
       <button
         onClick={handleSpin}
-        disabled={isSpinning || !ready || !imageLoaded}
+        disabled={isSpinning || !ready || !imageLoaded || disabled}
         className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#28a745] hover:bg-green-700 text-white font-bold disabled:opacity-60 disabled:cursor-not-allowed shadow-md transition-colors"
       >
         {isSpinning ? 'Girando...' : 'Girar roleta'}
