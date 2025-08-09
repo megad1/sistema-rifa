@@ -16,10 +16,9 @@ export default function RoletaPage() {
   const [remaining, setRemaining] = useState<number>(INITIAL_SPINS);
 
   useEffect(() => {
-    try {
-      const saved = Number(window.localStorage.getItem(remainingKey) || INITIAL_SPINS);
-      if (!Number.isNaN(saved)) setRemaining(saved);
-    } catch {}
+    // Durante ajustes: sempre resetar os giros ao carregar a página
+    try { window.localStorage.setItem(remainingKey, String(INITIAL_SPINS)); } catch {}
+    setRemaining(INITIAL_SPINS);
   }, []);
 
   const handleSpinStart = () => {
