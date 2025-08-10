@@ -220,7 +220,12 @@ export default function WinwheelRoulette({
       const currentAngle = ((prev.rotationAngle % 360) + 360) % 360;
 
       // Recria totalmente a instância para evitar qualquer timeline residual do GSAP
-      const newWheel = new window.Winwheel({
+      const WinwheelClass = window.Winwheel;
+      if (!WinwheelClass) {
+        setIsSpinning(false);
+        return;
+      }
+      const newWheel = new WinwheelClass({
         canvasId: canvasRef.current!.id,
         numSegments: segmentsRef.current.length,
         outerRadius: prev.outerRadius,
