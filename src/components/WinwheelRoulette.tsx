@@ -190,7 +190,16 @@ export default function WinwheelRoulette({
       wheelInstanceRef.current = null;
       setReady(false);
     };
-  }, []);
+  }, [
+    angleOffsetDeg,
+    durationSec,
+    imageFitScale,
+    imageSrc,
+    paddingPx,
+    segmentLabels,
+    spins,
+    wheelSizePx,
+  ]);
 
   const handleSpin = () => {
     if (!wheelInstanceRef.current || isSpinning || !ready || !imageLoaded || disabled) return;
@@ -206,9 +215,14 @@ export default function WinwheelRoulette({
       // Mata qualquer tween residual do GSAP na instância anterior
       try {
         if (window.TweenMax) {
-          (window.TweenMax as any).killTweensOf?.(prev);
-          (window.TweenMax as any).killDelayedCallsTo?.(prev);
-          (window.TweenMax as any).killAll?.(false, true, true);
+          const tm = window.TweenMax as unknown as {
+            killTweensOf?: (obj: unknown) => void;
+            killDelayedCallsTo?: (obj: unknown) => void;
+            killAll?: (a?: boolean, b?: boolean, c?: boolean) => void;
+          };
+          tm.killTweensOf?.(prev);
+          tm.killDelayedCallsTo?.(prev);
+          tm.killAll?.(false, true, true);
         }
       } catch {}
 
@@ -271,6 +285,7 @@ export default function WinwheelRoulette({
         />
 
         {centerOverlaySrc && (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={centerOverlaySrc}
             alt="Gire"
