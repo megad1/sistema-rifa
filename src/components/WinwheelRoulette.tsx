@@ -25,10 +25,16 @@ interface WinwheelInstance {
 
 type WinwheelCtor = new (config: Record<string, unknown>) => WinwheelInstance;
 
+interface TweenMaxLike {
+  killTweensOf?: (obj: unknown) => void;
+  killDelayedCallsTo?: (obj: unknown) => void;
+  killAll?: (a?: boolean, b?: boolean, c?: boolean) => void;
+}
+
 declare global {
   interface Window {
     Winwheel?: WinwheelCtor;
-    TweenMax?: unknown;
+    TweenMax?: TweenMaxLike;
   }
 }
 
@@ -190,7 +196,7 @@ export default function WinwheelRoulette({
       wheelInstanceRef.current = null;
       setReady(false);
     };
-  }, []);
+  }, []); // inicializar apenas uma vez (evita reiniciar a roleta durante o ciclo)
 
   const handleSpin = () => {
     if (!wheelInstanceRef.current || isSpinning || !ready || !imageLoaded || disabled) return;
@@ -205,11 +211,10 @@ export default function WinwheelRoulette({
       prev.stopAnimation(false);
       // Mata qualquer tween residual do GSAP na instância anterior
       try {
-        if (window.TweenMax) {
-          (window.TweenMax as any).killTweensOf?.(prev);
-          (window.TweenMax as any).killDelayedCallsTo?.(prev);
-          (window.TweenMax as any).killAll?.(false, true, true);
-        }
+        const tm = window.TweenMax;
+        tm?.killTweensOf?.(prev);
+        tm?.killDelayedCallsTo?.(prev);
+        tm?.killAll?.(false, true, true);
       } catch {}
 
       const currentAngle = ((prev.rotationAngle % 360) + 360) % 360;
