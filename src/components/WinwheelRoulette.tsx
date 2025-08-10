@@ -85,6 +85,8 @@ export default function WinwheelRoulette({
   const onSpinStartRef = useRef<typeof onSpinStart>(onSpinStart);
   useEffect(() => { onFinishedRef.current = onFinished; }, [onFinished]);
   useEffect(() => { onSpinStartRef.current = onSpinStart; }, [onSpinStart]);
+  const segmentsRef = useRef<Array<{ text: string; size?: number }>>([]);
+  const wheelImageRef = useRef<HTMLCanvasElement | HTMLImageElement | null>(null);
 
   useEffect(() => {
     let checkInterval: number | null = null;
@@ -98,6 +100,7 @@ export default function WinwheelRoulette({
 
       // Cria segmentos (lógica) com 60° cada, seguindo a ordem acima
       const segments = segmentLabels.map((label) => ({ text: label, size: 60 }));
+      segmentsRef.current = segments;
 
       const computedPct = Math.ceil(wheelSizePx * 0.015);
       const effectivePadding = paddingPx ?? Math.max(0, computedPct);
@@ -161,6 +164,7 @@ export default function WinwheelRoulette({
             ctx.drawImage(img, dx, dy, drawW, drawH);
           }
           theWheel.wheelImage = off;
+          wheelImageRef.current = off;
           theWheel.draw();
           setImageLoaded(true);
           setReady(true);
@@ -195,29 +199,56 @@ export default function WinwheelRoulette({
 
     // Reset opcional para permitir giros múltiplos
     try {
-      const wheel = wheelInstanceRef.current;
-      wheel.stopAnimation(false);
-      // manter ângulo atual
-      wheel.draw();
-      // Recriar objeto de animação para evitar resíduos do GSAP
-      const randomSpins = Math.max(6, Math.floor(spins));
-      wheel.animation = {
-        type: 'spinToStop',
-        duration: durationSec,
-        spins: randomSpins,
-        stopAngle: null,
-        callbackFinished: () => {
-          try {
-            const seg = wheel.getIndicatedSegment?.() ?? null;
-            if (seg && seg.text) {
-              setMessage(seg.text);
-              if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
+      const prev = wheelInstanceRef.current;
+      prev.stopAnimation(false);
+      // Mata qualquer tween residual do GSAP na instância anterior
+      try {
+        if (window.TweenMax) {
+          (window.TweenMax as any).killTweensOf?.(prev);
+          (window.TweenMax as any).killDelayedCallsTo?.(prev);
+          (window.TweenMax as any).killAll?.(false, true, true);
+        }
+      } catch {}
+
+      const currentAngle = ((prev.rotationAngle % 360) + 360) % 360;
+
+      // Recria totalmente a instância para evitar qualquer timeline residual do GSAP
+      const newWheel = new window.Winwheel({
+        canvasId: canvasRef.current!.id,
+        numSegments: segmentsRef.current.length,
+        outerRadius: prev.outerRadius,
+        pointerAngle: 90,
+        rotationAngle: currentAngle,
+        drawMode: 'image',
+        textFontSize: 0,
+        segments: segmentsRef.current,
+        animation: {
+          type: 'spinToStop',
+          duration: Math.max(5, durationSec),
+          spins: Math.max(10, Math.floor(spins) + Math.floor(Math.random() * 4)),
+          callbackFinished: () => {
+            try {
+              const seg = newWheel.getIndicatedSegment?.() ?? null;
+              if (seg && seg.text) {
+                setMessage(seg.text);
+                if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
+              }
+            } finally {
+              setIsSpinning(false);
             }
-          } finally {
-            setIsSpinning(false);
-          }
+          },
         },
-      };
+        pins: { number: 0 },
+      });
+
+      if (wheelImageRef.current) {
+        newWheel.wheelImage = wheelImageRef.current;
+      }
+      if (newWheel.animation) {
+        newWheel.animation.stopAngle = null;
+      }
+      newWheel.draw();
+      wheelInstanceRef.current = newWheel;
     } catch {}
 
     wheelInstanceRef.current.startAnimation();
