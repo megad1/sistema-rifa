@@ -63,9 +63,7 @@ export async function POST(request: Request) {
         const authHeader = `Basic ${Buffer.from(`${secretKey}:x`).toString('base64')}`;
 
         const webhookToken = process.env.WEBHOOK_TOKEN;
-        const baseUrlOverride = process.env.WEBHOOK_BASE_URL;
-        const host = request.headers.get('host');
-        const baseWebhookUrl = `${baseUrlOverride || (host ? `https://${host}` : '')}/webhook/paguesafe`;
+        const baseWebhookUrl = `https://${request.headers.get('host')}/webhook/paguesafe`;
         const postbackUrl = webhookToken ? `${baseWebhookUrl}?t=${encodeURIComponent(webhookToken)}` : baseWebhookUrl;
 
         const campaign = await getCampaignSettings();
