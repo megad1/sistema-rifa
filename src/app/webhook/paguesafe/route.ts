@@ -11,7 +11,8 @@ function isAuthorizedBasic(authHeader: string | null): boolean {
   if (!authHeader) return false;
   const [scheme, value] = authHeader.split(' ');
   if (scheme !== 'Basic' || !value) return false;
-  const expected = Buffer.from(`${process.env.SKALEPLAY_SECRET_KEY}:x`).toString('base64');
+  const key = process.env.SKALEPAY_SECRET_KEY;
+  const expected = Buffer.from(`${key}:x`).toString('base64');
   return value === expected;
 }
 
