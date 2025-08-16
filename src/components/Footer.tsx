@@ -31,13 +31,7 @@ const Footer = () => {
           2025 Sistema de Rifas© - Todos os direitos reservados.
         </p>
         
-        {/* Desenvolvedor */}
-        <div className="text-xs">
-          Desenvolvido por
-          <a href="https://incrivel.tech/" target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 ml-1 hover:underline">
-            Incrível.Tech
-          </a>
-        </div>
+        {/* Removido crédito do desenvolvedor a pedido do cliente */}
         
         {/* Selo Google */}
         <div className="flex justify-center pt-2">
