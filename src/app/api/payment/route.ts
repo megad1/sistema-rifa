@@ -52,9 +52,9 @@ export async function POST(request: Request) {
 
         // --- Geração de Pagamento na SkalePay ---
         const valor_centavos = Math.round(valor * 100);
-        const secretKey = process.env.SKALEPLAY_SECRET_KEY;
+        const secretKey = process.env.SKALEPAY_SECRET_KEY;
         if (!secretKey) {
-            throw new Error('Chave secreta da API de pagamento não configurada.');
+            throw new Error('Chave secreta da API de pagamento (SKALEPAY_SECRET_KEY) não configurada.');
         }
 
         const apiUrl = 'https://api.conta.skalepay.com.br/v1';

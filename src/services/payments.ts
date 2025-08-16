@@ -15,9 +15,9 @@ export interface SkalePayTransactionStatus {
 }
 
 export async function getSkalePayTransactionStatus(transactionId: string): Promise<SkalePayTransactionStatus> {
-  const secretKey = process.env.SKALEPLAY_SECRET_KEY;
+  const secretKey = process.env.SKALEPAY_SECRET_KEY;
   if (!secretKey) {
-    throw new Error('Chave da API não configurada.');
+    throw new Error('Chave da API (SKALEPAY_SECRET_KEY) não configurada.');
   }
 
   const authString = Buffer.from(`${secretKey}:x`).toString('base64');
