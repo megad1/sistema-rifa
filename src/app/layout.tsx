@@ -10,8 +10,8 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Wesley Alemão Clone",
-  description: "Clone do site de campanha Wesley Alemão",
+  title: "Campanha Filantrópica",
+  description: "Site de campanha filantrópica",
 };
 
 export default async function RootLayout({

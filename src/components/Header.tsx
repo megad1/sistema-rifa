@@ -27,8 +27,8 @@ const Header = () => {
               <Link href="/" passHref>
                 <div className="w-[140px] cursor-pointer">
                   <Image
-                    src="https://incs-bucket.s3.amazonaws.com/20250131_679d39cec9e99.png"
-                    alt="Wesley Alemão"
+                    src="/next.svg"
+                    alt="Logo da campanha"
                     width={150}
                     height={40}
                     priority
