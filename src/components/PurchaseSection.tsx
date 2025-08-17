@@ -20,6 +20,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
   const [spinsBump, setSpinsBump] = useState(false);
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp ?? '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp ?? '');
+  const MAX_QUANTITY = 200;
 
   useEffect(() => {
     setHasMounted(true);
@@ -66,7 +67,12 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
   }, [quantity, ticketPrice]);
 
   const handleAddQuantity = (amount: number) => {
-    setQuantity(current => Math.max(0, current + amount));
+    setQuantity(current => {
+      const next = current + amount;
+      if (next < 0) return 0;
+      if (next > MAX_QUANTITY) return MAX_QUANTITY;
+      return next;
+    });
   };
   
   const resetQuantity = () => {
@@ -161,7 +167,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                         </button>
                     </div>
                     <input type="text" value={quantity} readOnly className="flex-1 bg-transparent text-black text-center font-bold w-full"/>
-                    <button onClick={() => handleAddQuantity(1)} className="text-green-500 hover:text-green-400 text-xl px-2">
+                    <button onClick={() => handleAddQuantity(1)} disabled={quantity >= MAX_QUANTITY} className="text-green-500 hover:text-green-400 text-xl px-2 disabled:opacity-40 disabled:cursor-not-allowed">
                         <i className="bi bi-plus-circle-fill"></i>
                     </button>
                 </div>
