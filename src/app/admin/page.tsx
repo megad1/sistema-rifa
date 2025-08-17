@@ -180,16 +180,16 @@ export default function AdminPage() {
                       <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
                     <div>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
+                      <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                    </div>
+                    <div>
                       <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem</label>
                       <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                       {imageUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
                       )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
-                      <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
