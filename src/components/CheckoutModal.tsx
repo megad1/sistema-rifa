@@ -530,18 +530,18 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
                         className="rounded-md object-cover"
                       />
                 </div>
-                <p>
-                    <b className="font-semibold text-gray-800">{quantity}</b> {quantity === 1 ? 'cota' : 'cotas'} da campanha <b className="font-semibold text-gray-800">{campaignTitle}</b>
-                </p>
+                <div className="flex-1">
+                  <p className="text-gray-700">
+                      <b className="font-semibold text-gray-800">{quantity}</b> {quantity === 1 ? 'cota' : 'cotas'} da campanha <b className="font-semibold text-gray-800">{campaignTitle}</b>
+                  </p>
+                  {Math.floor(quantity / 5) > 0 && (
+                    <p className="mt-0.5 text-[11px] text-purple-700 font-semibold flex items-center gap-1">
+                      <i className="bi bi-stars"></i>
+                      BÔNUS: +{Math.floor(quantity / 5)} Giro{Math.floor(quantity / 5) > 1 ? 's' : ''} na Roleta da Sorte
+                    </p>
+                  )}
+                </div>
             </div>
-            {Math.floor(quantity / 5) > 0 && (
-              <div className="rounded-md bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white px-3 py-2 text-xs font-semibold inline-flex items-center gap-2">
-                <i className="bi bi-stars text-sm"></i>
-                <span>
-                  BÔNUS: +{Math.floor(quantity / 5)} Giro{Math.floor(quantity / 5) > 1 ? 's' : ''} na Roleta da Sorte
-                </span>
-              </div>
-            )}
             {renderStep()}
         </div>
       </div>
