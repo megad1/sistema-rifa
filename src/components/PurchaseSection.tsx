@@ -142,6 +142,21 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                     </div>
                 </button>
             </div>
+
+            {/* Giros bônus (visual) */}
+            <div className="mt-2">
+              {(() => {
+                const spins = Math.floor(quantity / 5);
+                return (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-md text-xs font-semibold">
+                      <i className="bi bi-lightning-charge-fill" />
+                      {spins > 0 ? `Você ganhará ${spins} giro${spins > 1 ? 's' : ''} na roleta` : 'A cada 5 cotas você ganha 1 giro na roleta'}
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
         </div>
 
         <CheckoutModal 
