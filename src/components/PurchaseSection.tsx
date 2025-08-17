@@ -118,8 +118,8 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                 </div>
                 <span
                   className={
-                    `bg-white/15 px-2 py-1 rounded-md text-xs font-semibold transition-transform duration-300 pulse-badge ` +
-                    `${spinsBump ? 'scale-110' : 'scale-100'}`
+                    `bg-white/15 px-2 py-1 rounded-md text-xs font-semibold transition-transform duration-300 ` +
+                    `${spinsBump ? 'scale-110 ring-2 ring-white/60' : 'scale-100'}`
                   }
                 >
                   {spins} giro{spins === 1 ? '' : 's'}
