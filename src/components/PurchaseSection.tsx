@@ -111,7 +111,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
             </div>
 
             {/* Banner Roleta da Sorte com animações */}
-            <div className={`rounded-2xl text-white p-3 shadow-lg mb-2 animated-gradient`}>
+            <div className={`rounded-lg text-white p-2 shadow-md mb-2 animated-gradient`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/25 shadow-sm">
