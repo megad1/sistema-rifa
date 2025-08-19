@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { SyntheticEvent } from 'react';
 import { Bungee } from 'next/font/google';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@/components/ui/table';
-import { CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Menu } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Sheet, SheetTrigger, SheetContent, SheetHeader as SheetHead, SheetTitle, SheetClose } from '@/components/ui/sheet';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
@@ -133,8 +135,8 @@ export default function AdminPage() {
     } catch {}
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: SyntheticEvent) => {
+    e?.preventDefault?.();
     setLoading(true);
     setMessage(null);
     try {
@@ -211,9 +213,46 @@ export default function AdminPage() {
         ) : (
           <>
             <div className="w-full">
-              <div className="mb-3">
-                <h1 className="text-2xl font-extrabold tracking-tight">Painel Administrativo</h1>
-                <p className="text-xs text-muted-foreground">Gerencie sua campanha, integrações e compras.</p>
+              {/* Topbar responsivo */}
+              <div className="sticky top-0 z-50 mb-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+                <div className="flex items-center gap-3 py-3">
+                  {/* Menu mobile */}
+                  <div className="lg:hidden">
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="secondary" size="icon" aria-label="Abrir menu">
+                          <Menu className="h-5 w-5" />
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="left" className="p-0">
+                        <SheetHead className="p-4 border-b border-border">
+                          <SheetTitle>Menu</SheetTitle>
+                        </SheetHead>
+                        <div className="p-3 space-y-2">
+                          <SheetClose asChild>
+                            <Button variant={activeTab==='campaign' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('campaign')}>Configurações</Button>
+                          </SheetClose>
+                          <SheetClose asChild>
+                            <Button variant={activeTab==='purchases' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('purchases')}>Compras</Button>
+                          </SheetClose>
+                          <SheetClose asChild>
+                            <Button variant={activeTab==='facebook' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('facebook')}>Facebook Pixel</Button>
+                          </SheetClose>
+                          <SheetClose asChild>
+                            <Button variant={activeTab==='utmify' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('utmify')}>Utmify</Button>
+                          </SheetClose>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl lg:text-2xl font-extrabold tracking-tight truncate">Painel Administrativo</h1>
+                    <p className="text-xs text-muted-foreground hidden sm:block">Gerencie sua campanha, integrações e compras.</p>
+                  </div>
+                  <div className="ml-auto">
+                    <Button onClick={handleSave} disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
+                  </div>
+                </div>
               </div>
 
               <div className="lg:flex lg:items-start lg:gap-4">
@@ -235,173 +274,165 @@ export default function AdminPage() {
                 {/* Conteúdo */}
                 <div className="flex-1 min-w-0">
                   <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-                <TabsList className="flex gap-2 overflow-x-auto no-scrollbar mb-3 lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-1 border border-border rounded-md">
-                  <TabsTrigger value="campaign" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Configurações</TabsTrigger>
-                  <TabsTrigger value="purchases" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Compras</TabsTrigger>
-                  <TabsTrigger value="facebook" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Facebook Pixel</TabsTrigger>
-                  <TabsTrigger value="utmify" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Utmify</TabsTrigger>
-                </TabsList>
-
                 {/* Configurações */}
                 {activeTab === 'campaign' && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Configurações da Campanha</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <Label className="text-xs" htmlFor="title">Título</Label>
-                        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" />
-                      </div>
-                      <div>
-                        <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
-                        <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3 items-end">
-                        <div>
-                          <Label className="text-xs">Logo</Label>
-                          <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
-                            <SelectTrigger className="mt-1">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="text">Texto</SelectItem>
-                              <SelectItem value="image">Imagem (URL)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          {logoMode === 'text' ? (
-                            <>
-                              <Label className="text-xs" htmlFor="logoText">Texto da Logo</Label>
-                              <Input id="logoText" value={logoText} onChange={(e) => setLogoText(e.target.value)} className="mt-1" />
-                            </>
-                          ) : (
-                            <>
-                              <Label className="text-xs" htmlFor="logoUrl">URL da Imagem da Logo</Label>
-                              <Input id="logoUrl" value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="mt-1" />
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <div className="md:col-span-2">
-                        {logoMode === 'image' && logoImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border border-border bg-card" />
-                        ) : (
-                          <div className="h-12 flex items-center justify-center rounded-md border border-border bg-card">
-                            <span className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`} style={{ lineHeight: 1 }}>{logoText || 'Rifas7k'}</span>
+                  <form onSubmit={handleSave}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Configurações da Campanha</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-xs" htmlFor="title">Título</Label>
+                            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" />
                           </div>
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-xs" htmlFor="bannerUrl">URL da Imagem do Banner</Label>
-                        <Input id="bannerUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="mt-1" />
-                        {imageUrl && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border border-border max-h-60 object-contain w-full bg-card" />
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 gap-3 items-end">
-                        <div>
-                          <Label className="text-xs">Modo do Sorteio</Label>
-                          <Select value={drawMode} onValueChange={(v) => setDrawMode(v as 'fixedDate' | 'sameDay' | 'today')}>
-                            <SelectTrigger className="mt-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="today">Hoje (data atual)</SelectItem>
-                              <SelectItem value="fixedDate">Data fixa</SelectItem>
-                              <SelectItem value="sameDay">Mesmo dia de todo mês</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <div>
+                            <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
+                            <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1" />
+                          </div>
                         </div>
-                        <div>
-                          {drawMode === 'fixedDate' ? (
-                            <>
-                              <Label className="text-xs" htmlFor="drawDate">Data do Sorteio</Label>
-                              <Input id="drawDate" type="date" value={drawDate || ''} onChange={(e) => setDrawDate(e.target.value)} className="mt-1" />
-                            </>
-                          ) : drawMode === 'sameDay' ? (
-                            <>
-                              <Label className="text-xs" htmlFor="drawDay">Dia do Mês</Label>
-                              <Input id="drawDay" type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="mt-1" />
-                            </>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                          <div>
+                            <Label className="text-xs">Logo</Label>
+                            <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="text">Texto</SelectItem>
+                                <SelectItem value="image">Imagem (URL)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            {logoMode === 'text' ? (
+                              <>
+                                <Label className="text-xs" htmlFor="logoText">Texto da Logo</Label>
+                                <Input id="logoText" value={logoText} onChange={(e) => setLogoText(e.target.value)} className="mt-1" />
+                              </>
+                            ) : (
+                              <>
+                                <Label className="text-xs" htmlFor="logoUrl">URL da Imagem da Logo</Label>
+                                <Input id="logoUrl" value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="mt-1" />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="md:col-span-2">
+                          {logoMode === 'image' && logoImageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border border-border bg-card" />
                           ) : (
-                            <>
-                              <Label className="text-xs">Exibição</Label>
-                              <Input readOnly value={new Date().toLocaleDateString('pt-BR')} className="mt-1" />
-                            </>
+                            <div className="h-12 flex items-center justify-center rounded-md border border-border bg-card">
+                              <span className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`} style={{ lineHeight: 1 }}>{logoText || 'Rifas7k'}</span>
+                            </div>
                           )}
                         </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
-                        <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 w-40 sm:w-48" />
-                      </div>
-                      <div className="flex justify-end">
-                        <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        <div>
+                          <Label className="text-xs" htmlFor="bannerUrl">URL da Imagem do Banner</Label>
+                          <Input id="bannerUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="mt-1" />
+                          {imageUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border border-border max-h-60 object-contain w-full bg-card" />
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                          <div>
+                            <Label className="text-xs">Modo do Sorteio</Label>
+                            <Select value={drawMode} onValueChange={(v) => setDrawMode(v as 'fixedDate' | 'sameDay' | 'today')}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="today">Hoje (data atual)</SelectItem>
+                                <SelectItem value="fixedDate">Data fixa</SelectItem>
+                                <SelectItem value="sameDay">Mesmo dia de todo mês</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            {drawMode === 'fixedDate' ? (
+                              <>
+                                <Label className="text-xs" htmlFor="drawDate">Data do Sorteio</Label>
+                                <Input id="drawDate" type="date" value={drawDate || ''} onChange={(e) => setDrawDate(e.target.value)} className="mt-1" />
+                              </>
+                            ) : drawMode === 'sameDay' ? (
+                              <>
+                                <Label className="text-xs" htmlFor="drawDay">Dia do Mês</Label>
+                                <Input id="drawDay" type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="mt-1" />
+                              </>
+                            ) : (
+                              <>
+                                <Label className="text-xs">Exibição</Label>
+                                <Input readOnly value={new Date().toLocaleDateString('pt-BR')} className="mt-1" />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
+                          <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 w-40 sm:w-48" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </form>
                 )}
 
                 {/* Facebook */}
                 {activeTab === 'facebook' && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Facebook Pixel / CAPI</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 gap-3">
-                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
-                          <Label className="text-xs" htmlFor="fb-enabled">Ativar Pixel</Label>
-                          <Switch id="fb-enabled" checked={fbEnabled} onCheckedChange={setFbEnabled} />
+                  <form onSubmit={handleSave}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Facebook Pixel / CAPI</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 gap-3">
+                          <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
+                            <Label className="text-xs" htmlFor="fb-enabled">Ativar Pixel</Label>
+                            <Switch id="fb-enabled" checked={fbEnabled} onCheckedChange={setFbEnabled} />
+                          </div>
+                          <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
+                            <Label className="text-xs" htmlFor="fb-purchase">Enviar Purchase</Label>
+                            <Switch id="fb-purchase" checked={fbSendPurchase} onCheckedChange={setFbSendPurchase} />
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
-                          <Label className="text-xs" htmlFor="fb-purchase">Enviar Purchase</Label>
-                          <Switch id="fb-purchase" checked={fbSendPurchase} onCheckedChange={setFbSendPurchase} />
+                        <div className="mt-3 grid grid-cols-1 gap-2">
+                          <div>
+                            <Label className="text-xs">Pixel ID</Label>
+                            <Input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="mt-1" />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Token API Conversões</Label>
+                            <Input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="mt-1" />
+                          </div>
                         </div>
-                      </div>
-                      <div className="mt-3 grid grid-cols-1 gap-2">
-                        <div>
-                          <Label className="text-xs">Pixel ID</Label>
-                          <Input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="mt-1" />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Token API Conversões</Label>
-                          <Input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="mt-1" />
-                        </div>
-                      </div>
-                      <div className="flex justify-end mt-3">
-                        <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </form>
                 )}
 
                 {/* Utmify */}
                 {activeTab === 'utmify' && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Utmify</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
-                        <Label className="text-xs" htmlFor="utm-enabled">Ativar Utmify</Label>
-                        <Switch id="utm-enabled" checked={utmEnabled} onCheckedChange={setUtmEnabled} />
-                      </div>
-                      <div className="mt-3 grid grid-cols-1 gap-2">
-                        <div>
-                          <Label className="text-xs">Token</Label>
-                          <Input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="mt-1" />
+                  <form onSubmit={handleSave}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Utmify</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
+                          <Label className="text-xs" htmlFor="utm-enabled">Ativar Utmify</Label>
+                          <Switch id="utm-enabled" checked={utmEnabled} onCheckedChange={setUtmEnabled} />
                         </div>
-                      </div>
-                      <div className="flex justify-end mt-3">
-                        <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        <div className="mt-3 grid grid-cols-1 gap-2">
+                          <div>
+                            <Label className="text-xs">Token</Label>
+                            <Input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="mt-1" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </form>
                 )}
 
                 {/* Compras */}
