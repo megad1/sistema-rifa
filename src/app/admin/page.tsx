@@ -302,7 +302,7 @@ export default function AdminPage() {
                           <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border border-border max-h-60 object-contain w-full bg-card" />
                         )}
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3 items-end">
                         <div>
                           <Label className="text-xs">Modo do Sorteio</Label>
                           <Select value={drawMode} onValueChange={(v) => setDrawMode(v as 'fixedDate' | 'sameDay' | 'today')}>
