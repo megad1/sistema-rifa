@@ -42,8 +42,8 @@ export default async function Home() {
               unoptimized
               className="object-contain object-center"
             />
-            {/* Gradiente que cobre apenas os 10% inferiores */}
-            <div className="absolute bottom-0 left-0 right-0 h-[10%] bg-gradient-to-t from-black to-transparent"></div>
+            {/* Gradiente que cobre a metade inferior */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black to-transparent"></div>
           </div>
         </div>
         {/* Texto da campanha sobreposto */}
