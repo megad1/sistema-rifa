@@ -72,6 +72,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
   const [tracking, setTracking] = useState<{ [k: string]: string | null }>({});
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp || '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp || '');
+  const [isEditingData, setIsEditingData] = useState(false);
   
   // --- Cálculo local de giros (mesma regra exibida no subtítulo: 1 giro a cada 5 cotas) ---
   const getSpinsFromQuantity = useCallback((qty: number) => {
@@ -280,6 +281,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
       setTitles([]);
       setIsClientFound(false);
       setIsCheckingPhone(false);
+      setIsEditingData(false);
       // habilita debug por env ou query ?debug=1
       try {
         const isQueryDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === '1';
@@ -377,22 +379,97 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
         return (
             <form className="space-y-2" onSubmit={handlePayment}>
                 {isClientFound && (
-                    <div className="bg-blue-100 border-l-4 border-blue-400 text-blue-800 p-2 text-sm rounded-r-md mb-2">
-                        <i className="bi bi-person-check-fill mr-2"></i>
-                        Olá de volta! Por favor, confirme seus dados.
+                    <div className="bg-blue-100 border-l-4 border-blue-400 text-blue-800 p-2 text-sm rounded-r-md mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <i className="bi bi-person-check-fill"></i>
+                          <span>Olá de volta! Por favor, confirme seus dados.</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingData((p) => !p)}
+                          className="text-xs font-bold px-2 py-1 rounded-md border border-blue-300 text-blue-800 hover:bg-blue-200/60"
+                          aria-label={isEditingData ? 'Concluir edição' : 'Editar dados'}
+                        >
+                          {isEditingData ? 'Concluir' : 'Editar'}
+                        </button>
                     </div>
                 )}
                 <div>
                     <label htmlFor="nome" className="block text-sm font-semibold text-gray-800 mb-1">Nome Completo</label>
-                    <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" placeholder="Seu nome completo" />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        value={formData.nome}
+                        onChange={handleInputChange}
+                        disabled={isClientFound && !isEditingData}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed"
+                        placeholder="Seu nome completo"
+                      />
+                      {isClientFound && (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingData((p) => !p)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200"
+                          aria-label={isEditingData ? 'Concluir edição' : 'Editar dados'}
+                        >
+                          {isEditingData ? 'OK' : 'Editar'}
+                        </button>
+                      )}
+                    </div>
                 </div>
                 <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">E-mail</label>
-                    <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" placeholder="seu@email.com" />
+                    <div className="relative">
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        disabled={isClientFound && !isEditingData}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed"
+                        placeholder="seu@email.com"
+                      />
+                      {isClientFound && (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingData((p) => !p)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200"
+                          aria-label={isEditingData ? 'Concluir edição' : 'Editar dados'}
+                        >
+                          {isEditingData ? 'OK' : 'Editar'}
+                        </button>
+                      )}
+                    </div>
                 </div>
                 <div>
                     <label htmlFor="cpf" className="block text-sm font-semibold text-gray-800 mb-1">CPF</label>
-                    <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" placeholder="000.000.000-00" inputMode="numeric" maxLength={14} />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="cpf"
+                        name="cpf"
+                        value={formData.cpf}
+                        onChange={handleInputChange}
+                        disabled={isClientFound && !isEditingData}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed"
+                        placeholder="000.000.000-00"
+                        inputMode="numeric"
+                        maxLength={14}
+                      />
+                      {isClientFound && (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingData((p) => !p)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200"
+                          aria-label={isEditingData ? 'Concluir edição' : 'Editar dados'}
+                        >
+                          {isEditingData ? 'OK' : 'Editar'}
+                        </button>
+                      )}
+                    </div>
                 </div>
                 {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
                 <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={isLoading || !formData.nome || !formData.email || !formData.cpf}>
