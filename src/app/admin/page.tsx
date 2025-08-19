@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { Bungee } from 'next/font/google';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
@@ -178,18 +182,22 @@ export default function AdminPage() {
     <div className="bg-[#ebebeb] min-h-screen p-4">
       <div className="container mx-auto max-w-7xl">
         {!isAuthed ? (
-          <div className="bg-white rounded-xl shadow-md p-4 space-y-4 border border-gray-200">
-            <form className="space-y-3" onSubmit={handleLogin}>
-              <h1 className="text-xl font-extrabold text-gray-900">Painel Administrativo</h1>
+          <Card className="border border-gray-200 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-xl">Painel Administrativo</CardTitle>
               <p className="text-xs text-gray-600">Acesse com seu token para gerenciar a campanha.</p>
-              <div>
-                <label className="block text-xs font-semibold text-gray-800 mb-1">Token</label>
-                <input id="admin_token" type="password" className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-              </div>
-              <button className="w-full bg-black text-white font-bold py-2 rounded-md hover:bg-gray-800 transition-colors text-sm">Entrar</button>
-              {loginError && <div className="text-sm text-center text-red-600">{loginError}</div>}
-            </form>
-          </div>
+            </CardHeader>
+            <CardContent>
+              <form className="space-y-3" onSubmit={handleLogin}>
+                <div>
+                  <Label htmlFor="admin_token" className="text-xs">Token</Label>
+                  <Input id="admin_token" type="password" className="mt-1" />
+                </div>
+                <Button className="w-full" type="submit">Entrar</Button>
+                {loginError && <div className="text-sm text-center text-red-600">{loginError}</div>}
+              </form>
+            </CardContent>
+          </Card>
         ) : (
           <>
             <div className="flex flex-col lg:flex-row items-start gap-4">
