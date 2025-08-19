@@ -329,13 +329,13 @@ export default function AdminPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 gap-3">
-                        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
+                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
                           <Label className="text-xs">Ativar Pixel</Label>
                           <Button variant={fbEnabled ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setFbEnabled(!fbEnabled)}>
                             {fbEnabled ? 'Ativo' : 'Inativo'}
                           </Button>
                         </div>
-                        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
+                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
                           <Label className="text-xs">Enviar Purchase</Label>
                           <Button variant={fbSendPurchase ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setFbSendPurchase(!fbSendPurchase)}>
                             {fbSendPurchase ? 'Ativo' : 'Inativo'}
@@ -366,7 +366,7 @@ export default function AdminPage() {
                       <CardTitle className="text-base">Utmify</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
+                      <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
                         <Label className="text-xs">Ativar Utmify</Label>
                         <Button variant={utmEnabled ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setUtmEnabled(!utmEnabled)}>
                           {utmEnabled ? 'Ativo' : 'Inativo'}
@@ -408,7 +408,7 @@ export default function AdminPage() {
                           <Button type="button" variant="secondary" size="sm" disabled={purchasesPage>=Math.max(1, Math.ceil(purchasesTotal/20))} onClick={() => setPurchasesPage((p) => p+1)}>Próxima</Button>
                         </div>
                       </div>
-                      <div className="rounded-lg overflow-hidden border border-gray-100">
+                      <div className="rounded-lg overflow-hidden border border-border">
                         <div className="overflow-x-auto [--radix-select-content-z-index:60]">
                           <div className="min-w-[760px]">
                             <Table>
@@ -423,19 +423,19 @@ export default function AdminPage() {
                               </TableHeader>
                               <TableBody>
                                 {purchasesLoading ? (
-                                  <TableRow><TableCell colSpan={5} className="text-xs text-gray-500">Carregando...</TableCell></TableRow>
+                                  <TableRow><TableCell colSpan={5} className="text-xs text-muted-foreground">Carregando...</TableCell></TableRow>
                                 ) : purchases.length === 0 ? (
-                                  <TableRow><TableCell colSpan={5} className="text-xs text-gray-500">Nenhuma compra encontrada.</TableCell></TableRow>
+                                  <TableRow><TableCell colSpan={5} className="text-xs text-muted-foreground">Nenhuma compra encontrada.</TableCell></TableRow>
                                 ) : (
                                   purchases.map((c) => {
                                     const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                                     const badgeClass = c.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
                                     return (
-                                      <TableRow key={c.id} className="hover:bg-gray-50">
+                                      <TableRow key={c.id} className="hover:bg-muted/60">
                                         <TableCell><Badge className={badgeClass}>{c.status}</Badge></TableCell>
                                         <TableCell>
                                           <div className="font-semibold truncate max-w-[220px]">{c.clientes?.nome || '—'}</div>
-                                          <div className="text-[11px] text-gray-500 truncate max-w-[220px]">{c.clientes?.email || ''}</div>
+                                          <div className="text-[11px] text-muted-foreground truncate max-w-[220px]">{c.clientes?.email || ''}</div>
                                         </TableCell>
                                         <TableCell className="font-mono text-[12px] truncate max-w-[160px]">{c.transaction_id}</TableCell>
                                         <TableCell>{c.quantidade_bilhetes}</TableCell>
