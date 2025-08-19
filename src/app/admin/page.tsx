@@ -10,27 +10,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+// Switch opcional: caso não exista no projeto, comente a linha acima e mantenha o fallback
+// import { Switch } from '@/components/ui/switch';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
-// Toggle Switch simples e acessível
-function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(!checked); } }}
-      className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors outline-none focus:ring-2 focus:ring-green-500 ${checked ? 'bg-green-600' : 'bg-gray-300'}`}
-      title={label}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${checked ? 'translate-x-5' : 'translate-x-1'}`}
-      />
-    </button>
-  );
-}
+// Removido ToggleSwitch em favor do Switch do shadcn
 
 export default function AdminPage() {
   const [title, setTitle] = useState('');
@@ -204,14 +189,32 @@ export default function AdminPage() {
           </Card>
         ) : (
           <>
-            <div className="flex-1 min-w-0 w-full">
+            <div className="w-full">
               <div className="mb-3">
                 <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
                 <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e compras.</p>
               </div>
 
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+              <div className="lg:flex lg:items-start lg:gap-4">
+                {/* Sidebar desktop */}
+                <aside className="hidden lg:block w-64 shrink-0">
+                  <Card className="border border-gray-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-sm">Menu</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <Button variant={activeTab==='campaign' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('campaign')}>Configurações</Button>
+                      <Button variant={activeTab==='purchases' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('purchases')}>Compras</Button>
+                      <Button variant={activeTab==='facebook' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('facebook')}>Facebook Pixel</Button>
+                      <Button variant={activeTab==='utmify' ? 'default' : 'secondary'} className="w-full justify-start" onClick={() => setActiveTab('utmify')}>Utmify</Button>
+                    </CardContent>
+                  </Card>
+                </aside>
+
+                {/* Conteúdo */}
+                <div className="flex-1 min-w-0">
+                  <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
+                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 lg:hidden">
                   <TabsTrigger value="campaign">Configurações</TabsTrigger>
                   <TabsTrigger value="purchases">Compras</TabsTrigger>
                   <TabsTrigger value="facebook">Facebook Pixel</TabsTrigger>
@@ -327,16 +330,16 @@ export default function AdminPage() {
                     <CardContent>
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
-                          <div>
-                            <p className="text-xs font-semibold text-gray-800">Ativar Pixel</p>
-                          </div>
-                          <ToggleSwitch checked={fbEnabled} onChange={setFbEnabled} label="Ativar Pixel" />
+                          <Label className="text-xs">Ativar Pixel</Label>
+                          <Button variant={fbEnabled ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setFbEnabled(!fbEnabled)}>
+                            {fbEnabled ? 'Ativo' : 'Inativo'}
+                          </Button>
                         </div>
                         <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
-                          <div>
-                            <p className="text-xs font-semibold text-gray-800">Enviar Purchase</p>
-                          </div>
-                          <ToggleSwitch checked={fbSendPurchase} onChange={setFbSendPurchase} label="Enviar Purchase" />
+                          <Label className="text-xs">Enviar Purchase</Label>
+                          <Button variant={fbSendPurchase ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setFbSendPurchase(!fbSendPurchase)}>
+                            {fbSendPurchase ? 'Ativo' : 'Inativo'}
+                          </Button>
                         </div>
                       </div>
                       <div className="mt-3 grid grid-cols-1 gap-2">
@@ -364,10 +367,10 @@ export default function AdminPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
-                        <div>
-                          <p className="text-xs font-semibold text-gray-800">Ativar Utmify</p>
-                        </div>
-                        <ToggleSwitch checked={utmEnabled} onChange={setUtmEnabled} label="Ativar Utmify" />
+                        <Label className="text-xs">Ativar Utmify</Label>
+                        <Button variant={utmEnabled ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setUtmEnabled(!utmEnabled)}>
+                          {utmEnabled ? 'Ativo' : 'Inativo'}
+                        </Button>
                       </div>
                       <div className="mt-3 grid grid-cols-1 gap-2">
                         <div>
@@ -406,7 +409,7 @@ export default function AdminPage() {
                         </div>
                       </div>
                       <div className="rounded-lg overflow-hidden border border-gray-100">
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto [--radix-select-content-z-index:60]">
                           <div className="min-w-[760px]">
                             <Table>
                               <TableHeader>
@@ -449,7 +452,9 @@ export default function AdminPage() {
                     </CardContent>
                   </Card>
                 )}
-              </Tabs>
+                  </Tabs>
+                </div>
+              </div>
 
               {message && <div className="text-sm text-center text-gray-700 mt-2">{message}</div>}
             </div>
