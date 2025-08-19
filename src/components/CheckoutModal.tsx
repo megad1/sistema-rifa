@@ -190,6 +190,10 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
           cpf: maskedCpf,
         }));
         setIsClientFound(true);
+        // Login automático usando o CPF encontrado
+        try {
+          await fetch('/api/client/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: data.cliente.cpf }) });
+        } catch {}
       } else {
         setIsClientFound(false);
       }
@@ -214,6 +218,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
     setError(null);
     setPixData(null);
     try {
+      // Garante login da sessão antes do pagamento (se CPF informado manualmente)
+      try {
+        const cpfDigits = formData.cpf.replace(/\D/g, '');
+        if (cpfDigits.length === 11) {
+          await fetch('/api/client/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpfDigits }) });
+        }
+      } catch {}
+
       const response = await fetch('/api/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
