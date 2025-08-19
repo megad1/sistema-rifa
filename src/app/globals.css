@@ -149,3 +149,7 @@ body.modal-open {
     color: hsl(var(--foreground));
   }
 }
+
+/* Utilitário para esconder a barra de rolagem de containers horizontais */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
