@@ -13,6 +13,7 @@ import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@
 import { CheckCircle2, Clock, XCircle, Menu } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader as SheetHead, SheetTitle, SheetClose } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
@@ -281,67 +282,80 @@ export default function AdminPage() {
                       <CardHeader>
                         <CardTitle className="text-base">Configurações da Campanha</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <Label className="text-xs" htmlFor="title">Título</Label>
-                            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" />
+                      <CardContent className="space-y-6">
+                        {/* Seção: Identidade */}
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div className="md:col-span-7">
+                              <Label className="text-xs" htmlFor="title">Título</Label>
+                              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-10" />
+                            </div>
+                            <div className="md:col-span-5">
+                              <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
+                              <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1 h-10" />
+                            </div>
                           </div>
-                          <div>
-                            <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
-                            <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1" />
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                            <div className="md:col-span-4">
+                              <Label className="text-xs">Logo</Label>
+                              <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
+                                <SelectTrigger className="mt-1 h-10">
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="text">Texto</SelectItem>
+                                  <SelectItem value="image">Imagem (URL)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="md:col-span-8">
+                              {logoMode === 'text' ? (
+                                <>
+                                  <Label className="text-xs" htmlFor="logoText">Texto da Logo</Label>
+                                  <Input id="logoText" value={logoText} onChange={(e) => setLogoText(e.target.value)} className="mt-1 h-10" />
+                                </>
+                              ) : (
+                                <>
+                                  <Label className="text-xs" htmlFor="logoUrl">URL da Imagem da Logo</Label>
+                                  <Input id="logoUrl" value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="mt-1 h-10" />
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-                          <div>
-                            <Label className="text-xs">Logo</Label>
-                            <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
-                              <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="Selecione" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="text">Texto</SelectItem>
-                                <SelectItem value="image">Imagem (URL)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            {logoMode === 'text' ? (
-                              <>
-                                <Label className="text-xs" htmlFor="logoText">Texto da Logo</Label>
-                                <Input id="logoText" value={logoText} onChange={(e) => setLogoText(e.target.value)} className="mt-1" />
-                              </>
+                          <div className="rounded-md border border-border bg-card p-3">
+                            {logoMode === 'image' && logoImageUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain" />
                             ) : (
-                              <>
-                                <Label className="text-xs" htmlFor="logoUrl">URL da Imagem da Logo</Label>
-                                <Input id="logoUrl" value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="mt-1" />
-                              </>
+                              <div className="h-14 flex items-center justify-center rounded-sm border border-border bg-muted/30">
+                                <span className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`} style={{ lineHeight: 1 }}>{logoText || 'Rifas7k'}</span>
+                              </div>
                             )}
                           </div>
                         </div>
-                        <div className="md:col-span-2">
-                          {logoMode === 'image' && logoImageUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border border-border bg-card" />
-                          ) : (
-                            <div className="h-12 flex items-center justify-center rounded-md border border-border bg-card">
-                              <span className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`} style={{ lineHeight: 1 }}>{logoText || 'Rifas7k'}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <Label className="text-xs" htmlFor="bannerUrl">URL da Imagem do Banner</Label>
-                          <Input id="bannerUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="mt-1" />
+
+                        <Separator />
+
+                        {/* Seção: Banner */}
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-xs" htmlFor="bannerUrl">URL da Imagem do Banner</Label>
+                            <Input id="bannerUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="mt-1 h-10" />
+                          </div>
                           {imageUrl && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border border-border max-h-60 object-contain w-full bg-card" />
+                            <img src={imageUrl} alt="Preview da imagem" className="rounded-md border border-border max-h-64 object-contain w-full bg-card" />
                           )}
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-                          <div>
+
+                        <Separator />
+
+                        {/* Seção: Sorteio e Preço */}
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                          <div className="md:col-span-6">
                             <Label className="text-xs">Modo do Sorteio</Label>
                             <Select value={drawMode} onValueChange={(v) => setDrawMode(v as 'fixedDate' | 'sameDay' | 'today')}>
-                              <SelectTrigger className="mt-1">
+                              <SelectTrigger className="mt-1 h-10">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -351,28 +365,28 @@ export default function AdminPage() {
                               </SelectContent>
                             </Select>
                           </div>
-                          <div>
+                          <div className="md:col-span-3">
                             {drawMode === 'fixedDate' ? (
                               <>
                                 <Label className="text-xs" htmlFor="drawDate">Data do Sorteio</Label>
-                                <Input id="drawDate" type="date" value={drawDate || ''} onChange={(e) => setDrawDate(e.target.value)} className="mt-1" />
+                                <Input id="drawDate" type="date" value={drawDate || ''} onChange={(e) => setDrawDate(e.target.value)} className="mt-1 h-10" />
                               </>
                             ) : drawMode === 'sameDay' ? (
                               <>
                                 <Label className="text-xs" htmlFor="drawDay">Dia do Mês</Label>
-                                <Input id="drawDay" type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="mt-1" />
+                                <Input id="drawDay" type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="mt-1 h-10" />
                               </>
                             ) : (
                               <>
                                 <Label className="text-xs">Exibição</Label>
-                                <Input readOnly value={new Date().toLocaleDateString('pt-BR')} className="mt-1" />
+                                <Input readOnly value={new Date().toLocaleDateString('pt-BR')} className="mt-1 h-10" />
                               </>
                             )}
                           </div>
-                        </div>
-                        <div>
-                          <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
-                          <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 w-40 sm:w-48" />
+                          <div className="md:col-span-3">
+                            <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
+                            <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 h-10" />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
