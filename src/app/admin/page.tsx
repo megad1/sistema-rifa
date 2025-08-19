@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Bungee } from 'next/font/google';
+
+const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
 // Toggle Switch simples e acessível
 function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -266,8 +269,13 @@ export default function AdminPage() {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border bg-white" />
                           ) : (
-                            <div className="h-10 flex items-center justify-center rounded-md border bg-white">
-                              <span className="text-base font-extrabold text-gray-900">{logoText || 'Prévia da Logo'}</span>
+                            <div className="h-12 flex items-center justify-center rounded-md border bg-white">
+                              <span
+                                className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`}
+                                style={{ lineHeight: 1 }}
+                              >
+                                {logoText || 'Rifas7k'}
+                              </span>
                             </div>
                           )}
                         </div>
