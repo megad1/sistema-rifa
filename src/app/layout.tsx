@@ -39,7 +39,7 @@ export default async function RootLayout({
           </>
         )}
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`${inter.className} bg-[#ebebeb]`} suppressHydrationWarning>
         {children}
         <Analytics />
         <SpeedInsights />

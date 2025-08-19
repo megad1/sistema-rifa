@@ -62,7 +62,7 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-black shadow-lg py-2">
+      <header className="sticky top-0 z-40 bg-black shadow-sm border-b border-gray-900 py-2">
         <div className="container mx-auto max-w-lg px-4">
           <div className="flex justify-between items-center">
 
