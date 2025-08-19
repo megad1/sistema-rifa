@@ -218,11 +218,13 @@ export default function AdminPage() {
                     <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
                     <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e compras.</p>
                   </div>
-                  <div className="hidden lg:block">
-                    <button onClick={(e) => { e.preventDefault(); const form = document.getElementById('admin-form') as HTMLFormElement | null; form?.requestSubmit(); }} disabled={loading} className="px-4 py-2 rounded-md bg-black text-white font-bold disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
-                      {loading ? 'Salvando...' : 'Salvar alterações'}
-                    </button>
-                  </div>
+                  {activeTab !== 'purchases' && (
+                    <div className="hidden lg:block">
+                      <button onClick={(e) => { e.preventDefault(); const form = document.getElementById('admin-form') as HTMLFormElement | null; form?.requestSubmit(); }} disabled={loading} className="px-4 py-2 rounded-md bg-black text-white font-bold disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
+                        {loading ? 'Salvando...' : 'Salvar alterações'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <form id="admin-form" className="space-y-4" onSubmit={handleSave}>
@@ -409,11 +411,13 @@ export default function AdminPage() {
                     </div>
                   )}
 
-                  <div className="lg:hidden">
-                    <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
-                      {loading ? 'Salvando...' : 'Salvar alterações'}
-                    </button>
-                  </div>
+                  {activeTab !== 'purchases' && (
+                    <div className="lg:hidden">
+                      <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
+                        {loading ? 'Salvando...' : 'Salvar alterações'}
+                      </button>
+                    </div>
+                  )}
                 </form>
 
                 {message && <div className="text-sm text-center text-gray-700 mt-2">{message}</div>}
