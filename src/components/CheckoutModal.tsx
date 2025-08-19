@@ -416,8 +416,12 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
                         <p className="text-xs text-gray-600">Seu pagamento foi aprovado. Os títulos aparecem abaixo nos detalhes.</p>
                         {/* Removido "Confirmado em" conforme solicitação */}
                         {getSpinsFromQuantity(quantity) > 0 && (
-                          <a href="/roleta" className="w-full mt-1 inline-flex justify-center items-center gap-2 bg-[#28a745] hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors">
-                            <i className="bi bi-lightning-charge-fill"></i>
+                          <a
+                            href="/roleta"
+                            className="w-full mt-1 animated-gradient text-white font-extrabold text-sm rounded-lg px-3 py-2 flex items-center justify-center gap-2 shadow-md ring-1 ring-white/30"
+                            aria-label={`Ir para a roleta (${getSpinsFromQuantity(quantity)} giros)`}
+                          >
+                            <i className="bi bi-stars text-base"></i>
                             Ir para a roleta ({getSpinsFromQuantity(quantity)} giro{getSpinsFromQuantity(quantity) > 1 ? 's' : ''})
                           </a>
                         )}
