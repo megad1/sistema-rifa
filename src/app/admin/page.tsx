@@ -174,13 +174,13 @@ export default function AdminPage() {
     const isPaid = s === 'paid';
     const isPending = s === 'pending';
     const theme = isPaid
-      ? { bg: 'bg-[rgb(16,185,129)]/15', text: 'text-[rgb(16,185,129)]', ring: 'ring-[rgb(16,185,129)]/45', icon: <CheckCircle2 className="h-3.5 w-3.5" /> , label: 'Pago' }
+      ? { bg: 'bg-[rgb(16,185,129)]/12', text: 'text-[rgb(16,185,129)]', ring: 'ring-[rgb(16,185,129)]/60', glow: 'shadow-[0_0_10px_rgba(16,185,129,0.45)]', icon: <CheckCircle2 className="h-3.5 w-3.5" /> , label: 'Pago' }
       : isPending
-      ? { bg: 'bg-[rgb(245,158,11)]/15', text: 'text-[rgb(245,158,11)]', ring: 'ring-[rgb(245,158,11)]/45', icon: <Clock className="h-3.5 w-3.5" />, label: 'Pendente' }
-      : { bg: 'bg-[rgb(244,63,94)]/15', text: 'text-[rgb(244,63,94)]', ring: 'ring-[rgb(244,63,94)]/45', icon: <XCircle className="h-3.5 w-3.5" />, label: status };
+      ? { bg: 'bg-[rgb(245,158,11)]/12', text: 'text-[rgb(245,158,11)]', ring: 'ring-[rgb(245,158,11)]/60', glow: 'shadow-[0_0_10px_rgba(245,158,11,0.45)]', icon: <Clock className="h-3.5 w-3.5" />, label: 'Pendente' }
+      : { bg: 'bg-[rgb(244,63,94)]/12', text: 'text-[rgb(244,63,94)]', ring: 'ring-[rgb(244,63,94)]/60', glow: 'shadow-[0_0_10px_rgba(244,63,94,0.45)]', icon: <XCircle className="h-3.5 w-3.5" />, label: status };
 
     return (
-      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold ${theme.bg} ${theme.text} ring-1 ring-inset ${theme.ring} shadow-sm`}> 
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${theme.bg} ${theme.text} ring-1 ring-inset ${theme.ring} ${theme.glow}`}> 
         {theme.icon}
         <span className="leading-none">{theme.label}</span>
       </span>
@@ -472,12 +472,12 @@ export default function AdminPage() {
                           <Button type="button" variant="secondary" size="sm" disabled={purchasesPage>=Math.max(1, Math.ceil(purchasesTotal/20))} onClick={() => setPurchasesPage((p) => p+1)}>Próxima</Button>
                         </div>
                       </div>
-                      <div className="rounded-lg overflow-hidden border border-border">
+                      <div className="rounded-lg border border-border">
                         <div className="overflow-x-auto [--radix-select-content-z-index:60]">
-                          <div className="min-w-[760px]">
-                            <Table className="text-[13px]">
+                          <div className="min-w-[760px] p-2 sm:p-4">
+                            <Table className="w-full text-[13px]">
                               <TableHeader>
-                                <TableRow className="bg-muted/40 [&>th]:py-3 [&>th]:text-[12px]">
+                                <TableRow className="bg-muted/40 border-b border-border/60 [&>th]:py-3 [&>th]:px-4 [&>th]:text-[12px]">
                                   <TableHead>Status</TableHead>
                                   <TableHead>Cliente</TableHead>
                                   <TableHead>Transação</TableHead>
@@ -494,7 +494,7 @@ export default function AdminPage() {
                                   purchases.map((c) => {
                                     const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                                     return (
-                                      <TableRow key={c.id} className="hover:bg-muted/60 border-b border-border/60 [&>td]:py-3">
+                                      <TableRow key={c.id} className="hover:bg-muted/60 border-b border-border/60 [&>td]:py-3 [&>td]:px-4">
                                         <TableCell>
                                           <StatusChip status={c.status} />
                                         </TableCell>
