@@ -10,8 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-// Switch opcional: caso não exista no projeto, comente a linha acima e mantenha o fallback
-// import { Switch } from '@/components/ui/switch';
+import { Switch } from '@/components/ui/switch';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
@@ -330,16 +329,12 @@ export default function AdminPage() {
                     <CardContent>
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
-                          <Label className="text-xs">Ativar Pixel</Label>
-                          <Button variant={fbEnabled ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setFbEnabled(!fbEnabled)}>
-                            {fbEnabled ? 'Ativo' : 'Inativo'}
-                          </Button>
+                          <Label className="text-xs" htmlFor="fb-enabled">Ativar Pixel</Label>
+                          <Switch id="fb-enabled" checked={fbEnabled} onCheckedChange={setFbEnabled} />
                         </div>
                         <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
-                          <Label className="text-xs">Enviar Purchase</Label>
-                          <Button variant={fbSendPurchase ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setFbSendPurchase(!fbSendPurchase)}>
-                            {fbSendPurchase ? 'Ativo' : 'Inativo'}
-                          </Button>
+                          <Label className="text-xs" htmlFor="fb-purchase">Enviar Purchase</Label>
+                          <Switch id="fb-purchase" checked={fbSendPurchase} onCheckedChange={setFbSendPurchase} />
                         </div>
                       </div>
                       <div className="mt-3 grid grid-cols-1 gap-2">
@@ -367,10 +362,8 @@ export default function AdminPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
-                        <Label className="text-xs">Ativar Utmify</Label>
-                        <Button variant={utmEnabled ? 'default' : 'secondary'} size="sm" type="button" onClick={() => setUtmEnabled(!utmEnabled)}>
-                          {utmEnabled ? 'Ativo' : 'Inativo'}
-                        </Button>
+                        <Label className="text-xs" htmlFor="utm-enabled">Ativar Utmify</Label>
+                        <Switch id="utm-enabled" checked={utmEnabled} onCheckedChange={setUtmEnabled} />
                       </div>
                       <div className="mt-3 grid grid-cols-1 gap-2">
                         <div>
