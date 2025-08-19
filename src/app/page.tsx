@@ -32,7 +32,7 @@ export default async function Home() {
       
       {/* Container para Banner */}
       <div className="relative">
-        <div className="h-[300px] w-full">
+        <div className="w-full h-[220px] sm:h-[300px] md:h-[360px] bg-black">
           <div className="relative h-full w-full">
             <Image
               src={banner}
@@ -40,7 +40,7 @@ export default async function Home() {
               fill
               priority
               unoptimized
-              className="object-cover object-center"
+              className="object-contain object-center"
             />
             {/* Gradiente que cobre a metade inferior */}
             <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black to-transparent"></div>
