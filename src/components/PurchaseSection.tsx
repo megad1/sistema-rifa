@@ -133,6 +133,37 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
               </div>
             </div>
 
+            {/* Banner principal com imagem: remove o bg preto e usa fundo transparente para evitar faixa superior */}
+            {campaignImage && (
+              <div className="relative">
+                <div className="w-full h-[220px] sm:h-[300px] md:h-[360px] bg-transparent">
+                  <div className="relative h-full w-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={campaignImage}
+                      alt="Prêmio"
+                      className="object-cover object-center w-full h-full"
+                      decoding="async"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent" />
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <section className="text-white text-left">
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-md animate-pulse">Adquira já!</span>
+                        <span className="text-xs font-semibold bg-black/40 px-2 py-1 rounded-md">{new Date().getFullYear()}</span>
+                      </div>
+                      <div className="w-full max-w-full cursor-pointer select-none">
+                        <h1 className="text-xl font-bold tracking-tight truncate" title={campaignTitle}>{campaignTitle}</h1>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-3 gap-2 mb-2 text-center">
                 {[10, 25, 50, 75, 100, 150].map((num) => {
                     const isPopular = num === 25;
