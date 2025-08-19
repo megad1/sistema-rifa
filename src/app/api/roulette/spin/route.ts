@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'decrement_error' }, { status: 500 });
     }
 
-    // Força cair em "TENTE OUTRA VEZ" (índices 1 ou 4)
+    // Força cair em "TENTE OUTRA VEZ" (índices 1 ou 4), escolhendo aleatoriamente entre os dois
     const candidates = [1, 4];
     const idx = candidates[Math.floor(Math.random() * candidates.length)];
 
@@ -77,8 +77,10 @@ export async function POST(request: Request) {
     let start = BASE_START_DEG;
     for (let i = 0; i < idx; i += 1) start = (start + SIZES_DEG[i]) % 360;
 
-    // Escolhe um ângulo interno ao segmento
-    const angleWithin = Math.random() * SIZES_DEG[idx];
+    // Escolhe um ângulo interno ao segmento, evitando as bordas (margem ~15% e mínimo 5°)
+    const size = SIZES_DEG[idx];
+    const margin = Math.min(size / 2 - 1, Math.max(5, size * 0.15));
+    const angleWithin = margin + Math.random() * (size - 2 * margin);
     const stopAngle = (start + angleWithin) % 360;
 
     const body: SpinResponse = {

@@ -289,7 +289,10 @@ export default function WinwheelRoulette({
           if (idx !== null) {
             let start = base;
             for (let i = 0; i < idx; i += 1) start = (start + sizes[i]) % 360;
-            const angleWithin = sizes[idx] / 2;
+            // Range seguro dentro do segmento (evita bordas ~15% com mínimo 5°)
+            const size = sizes[idx];
+            const margin = Math.min(size / 2 - 1, Math.max(5, size * 0.15));
+            const angleWithin = margin + Math.random() * (size - 2 * margin);
             const target = (start + angleWithin) % 360;
             newWheel.animation.stopAngle = target;
             selectedIdxRef.current = idx;
