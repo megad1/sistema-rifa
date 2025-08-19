@@ -43,6 +43,10 @@ export default function AdminPage() {
   const [utmEnabled, setUtmEnabled] = useState(false);
   const [utmToken, setUtmToken] = useState('');
   const [activeTab, setActiveTab] = useState<'campaign' | 'facebook' | 'utmify' | 'purchases'>('campaign');
+  const [purchases, setPurchases] = useState<Array<{ id: string; transaction_id: string; quantidade_bilhetes: number; valor_total: number; status: string; paid_at: string | null; created_at: string; clientes?: { nome?: string; email?: string; cpf?: string } | null }>>([]);
+  const [purchasesPage, setPurchasesPage] = useState(1);
+  const [purchasesTotal, setPurchasesTotal] = useState(0);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -85,6 +89,20 @@ export default function AdminPage() {
       } catch {}
     })();
   }, []);
+
+  useEffect(() => {
+    if (!isAuthed) return;
+    if (activeTab !== 'purchases') return;
+    (async () => {
+      setPurchasesLoading(true);
+      try {
+        const res = await fetch(`/api/admin/purchases?page=${purchasesPage}&pageSize=20`, { cache: 'no-store' });
+        const json = await res.json();
+        if (json?.success) { setPurchases(json.items || []); setPurchasesTotal(json.total || 0); }
+      } catch {}
+      setPurchasesLoading(false);
+    })();
+  }, [isAuthed, activeTab, purchasesPage]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -335,7 +353,22 @@ export default function AdminPage() {
                   {activeTab === 'purchases' && (
                     <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
                       <h2 className="text-base font-bold text-gray-800 mb-3">Compras (em breve)</h2>
-                      <div className="text-xs text-gray-600 mb-3">Em uma próxima versão, este painel mostrará as compras com filtros por status, cliente e período.</div>
+                      <div className="text-xs text-gray-600 mb-3">Lista de compras do banco (ordenado por mais recentes).</div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <button type="button" onClick={async () => {
+                          setPurchasesLoading(true);
+                          try {
+                            const res = await fetch(`/api/admin/purchases?page=${purchasesPage}&pageSize=20`, { cache: 'no-store' });
+                            const json = await res.json();
+                            if (json?.success) { setPurchases(json.items || []); setPurchasesTotal(json.total || 0); }
+                          } finally { setPurchasesLoading(false); }
+                        }} className="px-3 py-1 rounded-md bg-black text-white text-xs font-semibold">Atualizar</button>
+                        <span className="text-[12px] text-gray-600">Página {purchasesPage} de {Math.max(1, Math.ceil(purchasesTotal / 20))}</span>
+                        <div className="ml-auto flex gap-2">
+                          <button type="button" disabled={purchasesPage<=1} onClick={() => setPurchasesPage((p) => Math.max(1, p-1))} className="px-2 py-1 rounded-md bg-gray-200 text-gray-800 text-xs disabled:opacity-50">Anterior</button>
+                          <button type="button" disabled={purchasesPage>=Math.max(1, Math.ceil(purchasesTotal/20))} onClick={() => setPurchasesPage((p) => p+1)} className="px-2 py-1 rounded-md bg-gray-200 text-gray-800 text-xs disabled:opacity-50">Próxima</button>
+                        </div>
+                      </div>
                       <div className="border rounded-md overflow-hidden">
                         <div className="grid grid-cols-12 bg-gray-50 p-2 text-[12px] font-semibold text-gray-700">
                           <div className="col-span-3">Cliente</div>
@@ -344,7 +377,23 @@ export default function AdminPage() {
                           <div className="col-span-2">Valor</div>
                           <div className="col-span-2 text-right">Status</div>
                         </div>
-                        <div className="p-3 text-xs text-gray-500">Nenhum dado para exibir.</div>
+                        {purchasesLoading ? (
+                          <div className="p-3 text-xs text-gray-500">Carregando...</div>
+                        ) : purchases.length === 0 ? (
+                          <div className="p-3 text-xs text-gray-500">Nenhum dado para exibir.</div>
+                        ) : (
+                          <div className="divide-y">
+                            {purchases.map((c) => (
+                              <div key={c.id} className="grid grid-cols-12 p-2 text-[12px] text-gray-800">
+                                <div className="col-span-3 truncate">{c.clientes?.nome || '—'}<span className="block text-[11px] text-gray-500 truncate">{c.clientes?.email || ''}</span></div>
+                                <div className="col-span-3 truncate">{c.transaction_id}</div>
+                                <div className="col-span-2">{c.quantidade_bilhetes}</div>
+                                <div className="col-span-2">R$ {Number(c.valor_total).toFixed(2)}</div>
+                                <div className="col-span-2 text-right font-semibold {c.status==='paid' ? 'text-green-700' : 'text-yellow-700'}">{c.status}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
