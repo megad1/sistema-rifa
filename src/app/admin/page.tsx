@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
@@ -165,6 +165,24 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
+
+  function StatusChip({ status }: { status: string }) {
+    const s = (status || '').toLowerCase();
+    const isPaid = s === 'paid';
+    const isPending = s === 'pending';
+    const theme = isPaid
+      ? { bg: 'bg-emerald-500/10', text: 'text-emerald-400', ring: 'ring-emerald-500/30', icon: <CheckCircle2 className="h-3.5 w-3.5" /> , label: 'Pago' }
+      : isPending
+      ? { bg: 'bg-amber-500/10', text: 'text-amber-400', ring: 'ring-amber-500/30', icon: <Clock className="h-3.5 w-3.5" />, label: 'Pendente' }
+      : { bg: 'bg-rose-500/10', text: 'text-rose-400', ring: 'ring-rose-500/30', icon: <XCircle className="h-3.5 w-3.5" />, label: status };
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${theme.bg} ${theme.text} ring-1 ring-inset ${theme.ring}`}> 
+        {theme.icon}
+        <span className="leading-none">{theme.label}</span>
+      </span>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 bg-background text-foreground">
@@ -430,10 +448,11 @@ export default function AdminPage() {
                                 ) : (
                                   purchases.map((c) => {
                                     const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                                    const badgeClass = c.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
                                     return (
                                       <TableRow key={c.id} className="hover:bg-muted/60">
-                                        <TableCell><Badge className={badgeClass}>{c.status}</Badge></TableCell>
+                                        <TableCell>
+                                          <StatusChip status={c.status} />
+                                        </TableCell>
                                         <TableCell>
                                           <div className="font-semibold truncate max-w-[220px]">{c.clientes?.nome || '—'}</div>
                                           <div className="text-[11px] text-muted-foreground truncate max-w-[220px]">{c.clientes?.email || ''}</div>
