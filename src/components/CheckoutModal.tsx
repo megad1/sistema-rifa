@@ -73,6 +73,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp || '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp || '');
   
+  // --- Cálculo local de giros (alinha com services/payments.ts) ---
+  const getSpinsFromQuantity = useCallback((qty: number) => {
+    const ratio = Number(process.env.NEXT_PUBLIC_ROULETTE_SPINS_PER_TICKET || process.env.ROULETTE_SPINS_PER_TICKET || '0.1');
+    const minPerPurchase = Number(process.env.NEXT_PUBLIC_ROULETTE_MIN_SPINS_PER_PURCHASE || process.env.ROULETTE_MIN_SPINS_PER_PURCHASE || '0');
+    const computed = Math.floor(qty * ratio);
+    return Math.max(computed, minPerPurchase);
+  }, []);
+  
   // --- Refs para lógica de polling ---
   const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
 
@@ -410,6 +418,12 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
                         <h3 className="text-base font-bold text-gray-800">Pagamento confirmado</h3>
                         <p className="text-xs text-gray-600">Seu pagamento foi aprovado. Os títulos aparecem abaixo nos detalhes.</p>
                         {/* Removido "Confirmado em" conforme solicitação */}
+                        {getSpinsFromQuantity(quantity) > 0 && (
+                          <a href="/roleta" className="w-full mt-1 inline-flex justify-center items-center gap-2 bg-[#28a745] hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors">
+                            <i className="bi bi-lightning-charge-fill"></i>
+                            Ir para a roleta ({getSpinsFromQuantity(quantity)} giro{getSpinsFromQuantity(quantity) > 1 ? 's' : ''})
+                          </a>
+                        )}
                     </div>
                 ) : (
                     <>
@@ -500,6 +514,9 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
                     </p>
                     {paidAt && <p className="text-xs text-gray-700"><b>Data do Pagamento:</b> {paidAt}</p>}
                     <p className="text-xs text-gray-700"><b>Quantidade:</b> {quantity}</p>
+                    {getSpinsFromQuantity(quantity) > 0 && (
+                      <p className="text-xs text-gray-700"><b>Giros de bônus:</b> {getSpinsFromQuantity(quantity)}</p>
+                    )}
                     <p className="text-xs font-bold text-gray-800"><b>Total:</b> {pixData!.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                     <div className="text-xs text-gray-700">
                         <b>Títulos:</b>
