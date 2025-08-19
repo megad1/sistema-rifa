@@ -12,16 +12,23 @@ import { useCallback, useEffect, useState } from 'react';
 import { limparCpf } from '@/utils/formatters';
 
 export default function RoletaPage() {
-  const [cpf, setCpf] = useState<string>('');
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [cpfInput, setCpfInput] = useState<string>('');
+  const [loginLoading, setLoginLoading] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
-  const fetchBalance = useCallback(async (cpfInput: string) => {
-    const clean = limparCpf(cpfInput);
-    if (!clean) { setBalance(0); return; }
+  const fetchBalance = useCallback(async (cpfOptional?: string) => {
     setLoading(true);
     try {
-      const resp = await fetch('/api/roulette/balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: clean }) });
+      let resp: Response;
+      if (cpfOptional) {
+        const clean = limparCpf(cpfOptional);
+        resp = await fetch('/api/roulette/balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: clean }) });
+      } else {
+        resp = await fetch('/api/roulette/balance', { method: 'POST' });
+      }
       if (!resp.ok) { setBalance(0); return; }
       const data = await resp.json();
       setBalance(Number(data?.balance ?? 0));
@@ -29,23 +36,44 @@ export default function RoletaPage() {
   }, []);
 
   const handleSpinStart = () => true;
-  const handleFinished = () => { if (cpf) fetchBalance(cpf); };
+  const handleFinished = () => { fetchBalance(); };
 
-  // Ao montar, tenta puxar saldo pela sessão (sem CPF). Se houver, não precisa digitar.
+  // Checa sessão; se não houver, abre modal de CPF; se houver, busca saldo
   useEffect(() => {
     (async () => {
       try {
-        setLoading(true);
-        const resp = await fetch('/api/roulette/balance', { method: 'POST' });
-        if (resp.ok) {
-          const data = await resp.json();
-          setBalance(Number(data?.balance ?? 0));
+        const r = await fetch('/api/client/session', { cache: 'no-store' });
+        const s = await r.json();
+        if (s?.active) {
+          await fetchBalance();
+        } else {
+          setShowLoginModal(true);
         }
-      } finally {
-        setLoading(false);
+      } catch {
+        setShowLoginModal(true);
       }
     })();
-  }, []);
+  }, [fetchBalance]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    const clean = limparCpf(cpfInput);
+    if (!clean || clean.length !== 11) { setLoginError('CPF inválido'); return; }
+    setLoginLoading(true);
+    try {
+      const resp = await fetch('/api/client/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: clean }) });
+      const data = await resp.json();
+      if (!resp.ok || !data?.success) { setLoginError(data?.message || 'Falha no login'); return; }
+      setShowLoginModal(false);
+      setCpfInput('');
+      await fetchBalance();
+    } catch {
+      setLoginError('Erro ao entrar');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
   return (
     <div className="bg-[#ebebeb] min-h-screen">
       {/* GSAP TweenMax v2 (necessária para Winwheel.js clássico) */}
@@ -65,21 +93,6 @@ export default function RoletaPage() {
             </h1>
             <p className="mt-1 text-base sm:text-lg text-gray-700 font-semibold">Gire a roleta e boa sorte!</p>
             <div className="mt-3 sm:mt-4 grid grid-cols-1 gap-2">
-              <div className="flex items-center gap-2 justify-between">
-                <input
-                  value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
-                  placeholder="Informe seu CPF para usar os giros"
-                  className="flex-1 border rounded-md px-3 py-2 text-sm"
-                />
-                <button
-                  onClick={() => fetchBalance(cpf)}
-                  className="px-3 py-2 rounded-md bg-blue-600 text-white text-sm font-semibold disabled:opacity-60"
-                  disabled={loading}
-                >
-                  {loading ? 'Carregando...' : 'Atualizar saldo'}
-                </button>
-              </div>
               <div className="bg-gray-100 rounded-md px-3 py-1 text-sm font-semibold text-gray-700 text-right">
                 Giros restantes: <span className="text-gray-900">{balance}</span>
               </div>
@@ -93,14 +106,37 @@ export default function RoletaPage() {
               angleOffsetDeg={-30}
               paddingPx={0}
               imageFitScale={1.12}
-              playerCpf={cpf}
               onSpinStart={handleSpinStart}
               onFinished={handleFinished}
-              disabled={!cpf || balance <= 0}
+              disabled={balance <= 0}
             />
           </div>
         </div>
       </div>
+
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-4">
+            <h2 className="text-lg font-bold text-gray-900">Entre para girar a roleta</h2>
+            <p className="text-xs text-gray-600 mt-1">Informe seu CPF para carregar seus giros.</p>
+            <form className="mt-3 space-y-2" onSubmit={handleLogin}>
+              <input
+                value={cpfInput}
+                onChange={(e) => setCpfInput(e.target.value)}
+                placeholder="000.000.000-00"
+                inputMode="numeric"
+                maxLength={14}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              />
+              {loginError && <div className="text-xs text-red-600">{loginError}</div>}
+              <div className="flex gap-2 justify-end pt-1">
+                <button type="button" onClick={() => setShowLoginModal(false)} className="px-3 py-2 rounded-md text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200">Cancelar</button>
+                <button type="submit" disabled={loginLoading} className="px-3 py-2 rounded-md text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">{loginLoading ? 'Entrando...' : 'Continuar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
