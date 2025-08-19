@@ -222,7 +222,7 @@ export default function AdminPage() {
 
                 {/* Configurações */}
                 {activeTab === 'campaign' && (
-                  <Card className="border border-gray-200 shadow-sm">
+                  <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Configurações da Campanha</CardTitle>
                     </CardHeader>
@@ -263,9 +263,9 @@ export default function AdminPage() {
                       <div>
                         {logoMode === 'image' && logoImageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border bg-white" />
+                          <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border border-border bg-card" />
                         ) : (
-                          <div className="h-12 flex items-center justify-center rounded-md border bg-white">
+                          <div className="h-12 flex items-center justify-center rounded-md border border-border bg-card">
                             <span className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`} style={{ lineHeight: 1 }}>{logoText || 'Rifas7k'}</span>
                           </div>
                         )}
@@ -275,7 +275,7 @@ export default function AdminPage() {
                         <Input id="bannerUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="mt-1" />
                         {imageUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-60 object-contain w-full bg-white" />
+                          <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border border-border max-h-60 object-contain w-full bg-card" />
                         )}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -322,17 +322,17 @@ export default function AdminPage() {
 
                 {/* Facebook */}
                 {activeTab === 'facebook' && (
-                  <Card className="border border-gray-200 shadow-sm">
+                  <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Facebook Pixel / CAPI</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 gap-3">
-                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
+                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
                           <Label className="text-xs" htmlFor="fb-enabled">Ativar Pixel</Label>
                           <Switch id="fb-enabled" checked={fbEnabled} onCheckedChange={setFbEnabled} />
                         </div>
-                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
+                        <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
                           <Label className="text-xs" htmlFor="fb-purchase">Enviar Purchase</Label>
                           <Switch id="fb-purchase" checked={fbSendPurchase} onCheckedChange={setFbSendPurchase} />
                         </div>
@@ -356,12 +356,12 @@ export default function AdminPage() {
 
                 {/* Utmify */}
                 {activeTab === 'utmify' && (
-                  <Card className="border border-gray-200 shadow-sm">
+                  <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Utmify</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2">
+                      <div className="flex items-center justify-between bg-muted border border-border rounded-md p-2 max-w-sm">
                         <Label className="text-xs" htmlFor="utm-enabled">Ativar Utmify</Label>
                         <Switch id="utm-enabled" checked={utmEnabled} onCheckedChange={setUtmEnabled} />
                       </div>
@@ -380,7 +380,7 @@ export default function AdminPage() {
 
                 {/* Compras */}
                 {activeTab === 'purchases' && (
-                  <Card className="border border-gray-200 shadow-sm">
+                  <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Compras</CardTitle>
                       <p className="text-xs text-gray-600">Ordenado por mais recentes. Use os botões para navegar.</p>
