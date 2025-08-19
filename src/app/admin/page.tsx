@@ -6,6 +6,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
@@ -200,152 +204,127 @@ export default function AdminPage() {
           </Card>
         ) : (
           <>
-            <div className="flex flex-col lg:flex-row items-start gap-4">
-              {/* Sidebar */}
-              <aside className="hidden lg:block w-64 shrink-0">
-                <div className="bg-white rounded-lg shadow border border-gray-200 p-3">
-                  <h2 className="text-sm font-bold text-gray-800 mb-2">Menu</h2>
-                  <nav className="space-y-1">
-                    <button type="button" onClick={() => setActiveTab('campaign')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='campaign' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
-                      <i className="bi bi-gear me-1"></i> Configurações
-                    </button>
-                    <button type="button" onClick={() => setActiveTab('facebook')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='facebook' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
-                      <i className="bi bi-meta me-1"></i> Facebook Pixel
-                    </button>
-                    <button type="button" onClick={() => setActiveTab('utmify')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='utmify' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
-                      <i className="bi bi-diagram-3 me-1"></i> Utmify
-                    </button>
-                    <button type="button" onClick={() => setActiveTab('purchases')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='purchases' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
-                      <i className="bi bi-receipt me-1"></i> Compras
-                    </button>
-                  </nav>
-                </div>
-              </aside>
+            <div className="flex-1 min-w-0 w-full">
+              <div className="mb-3">
+                <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
+                <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e compras.</p>
+              </div>
 
-              
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
+                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                  <TabsTrigger value="campaign">Configurações</TabsTrigger>
+                  <TabsTrigger value="purchases">Compras</TabsTrigger>
+                  <TabsTrigger value="facebook">Facebook Pixel</TabsTrigger>
+                  <TabsTrigger value="utmify">Utmify</TabsTrigger>
+                </TabsList>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0 w-full">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
-                    <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e compras.</p>
-                  </div>
-                  {activeTab !== 'purchases' && (
-                    <div className="hidden lg:block">
-                      <button onClick={(e) => { e.preventDefault(); const form = document.getElementById('admin-form') as HTMLFormElement | null; form?.requestSubmit(); }} disabled={loading} className="px-4 py-2 rounded-md bg-black text-white font-bold disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
-                        {loading ? 'Salvando...' : 'Salvar alterações'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Menu (mobile) abaixo do título/subtítulo */}
-                <div className="lg:hidden w-full mb-3">
-                  <div className="bg-white rounded-lg shadow border border-gray-200 p-2">
-                    <nav className="grid grid-cols-2 gap-2 text-sm font-semibold">
-                      <button type="button" onClick={() => setActiveTab('campaign')} className={`px-3 py-2 rounded-md ${activeTab==='campaign' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Configurações</button>
-                      <button type="button" onClick={() => setActiveTab('purchases')} className={`px-3 py-2 rounded-md ${activeTab==='purchases' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Compras</button>
-                      <button type="button" onClick={() => setActiveTab('facebook')} className={`px-3 py-2 rounded-md ${activeTab==='facebook' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Facebook Pixel</button>
-                      <button type="button" onClick={() => setActiveTab('utmify')} className={`px-3 py-2 rounded-md ${activeTab==='utmify' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Utmify</button>
-                    </nav>
-                  </div>
-                </div>
-
-                <form id="admin-form" className="space-y-4" onSubmit={handleSave}>
-                  {activeTab === 'campaign' && (
-                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                      <h2 className="text-base font-bold text-gray-800 mb-3">Configurações da Campanha</h2>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Título</label>
-                          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
-                          <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-800 mb-1">Logo</label>
-                            <select value={logoMode} onChange={(e) => setLogoMode(e.target.value as 'text' | 'image')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
-                              <option value="text">Texto</option>
-                              <option value="image">Imagem (URL)</option>
-                            </select>
-                          </div>
-                          {logoMode === 'text' ? (
-                            <div>
-                              <label className="block text-xs font-semibold text-gray-800 mb-1">Texto da Logo</label>
-                              <input value={logoText} onChange={(e) => setLogoText(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                            </div>
-                          ) : (
-                            <div>
-                              <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem da Logo</label>
-                              <input value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                            </div>
-                          )}
-                        </div>
-                        {/* Preview da logo */}
-                        <div className="mt-2">
-                          {logoMode === 'image' && logoImageUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border bg-white" />
-                          ) : (
-                            <div className="h-12 flex items-center justify-center rounded-md border bg-white">
-                              <span
-                                className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`}
-                                style={{ lineHeight: 1 }}
-                              >
-                                {logoText || 'Rifas7k'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem do Banner</label>
-                          <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                          {imageUrl && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-60 object-contain w-full bg-white" />
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-800 mb-1">Modo do Sorteio</label>
-                            <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay' | 'today')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
-                              <option value="today">Hoje (data atual)</option>
-                              <option value="fixedDate">Data fixa</option>
-                              <option value="sameDay">Mesmo dia de todo mês</option>
-                            </select>
-                          </div>
-                          {drawMode === 'fixedDate' ? (
-                            <div>
-                              <label className="block text-xs font-semibold text-gray-800 mb-1">Data do Sorteio</label>
-                              <input type="date" value={drawDate} onChange={(e) => setDrawDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                            </div>
-                          ) : drawMode === 'sameDay' ? (
-                            <div>
-                              <label className="block text-xs font-semibold text-gray-800 mb-1">Dia do Mês</label>
-                              <input type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                            </div>
-                          ) : (
-                            <div>
-                              <label className="block text-xs font-semibold text-gray-800 mb-1">Exibição</label>
-                              <input value={new Date().toLocaleDateString('pt-BR')} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-500 bg-gray-100" />
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
-                          <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                        </div>
+                {/* Configurações */}
+                {activeTab === 'campaign' && (
+                  <Card className="border border-gray-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-base">Configurações da Campanha</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div>
+                        <Label className="text-xs" htmlFor="title">Título</Label>
+                        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" />
                       </div>
-                    </div>
-                  )}
+                      <div>
+                        <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
+                        <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1" />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs">Logo</Label>
+                          <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text">Texto</SelectItem>
+                              <SelectItem value="image">Imagem (URL)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {logoMode === 'text' ? (
+                          <div>
+                            <Label className="text-xs" htmlFor="logoText">Texto da Logo</Label>
+                            <Input id="logoText" value={logoText} onChange={(e) => setLogoText(e.target.value)} className="mt-1" />
+                          </div>
+                        ) : (
+                          <div>
+                            <Label className="text-xs" htmlFor="logoUrl">URL da Imagem da Logo</Label>
+                            <Input id="logoUrl" value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="mt-1" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        {logoMode === 'image' && logoImageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border bg-white" />
+                        ) : (
+                          <div className="h-12 flex items-center justify-center rounded-md border bg-white">
+                            <span className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`} style={{ lineHeight: 1 }}>{logoText || 'Rifas7k'}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-xs" htmlFor="bannerUrl">URL da Imagem do Banner</Label>
+                        <Input id="bannerUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="mt-1" />
+                        {imageUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-60 object-contain w-full bg-white" />
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs">Modo do Sorteio</Label>
+                          <Select value={drawMode} onValueChange={(v) => setDrawMode(v as 'fixedDate' | 'sameDay' | 'today')}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="today">Hoje (data atual)</SelectItem>
+                              <SelectItem value="fixedDate">Data fixa</SelectItem>
+                              <SelectItem value="sameDay">Mesmo dia de todo mês</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {drawMode === 'fixedDate' ? (
+                          <div>
+                            <Label className="text-xs" htmlFor="drawDate">Data do Sorteio</Label>
+                            <Input id="drawDate" type="date" value={drawDate || ''} onChange={(e) => setDrawDate(e.target.value)} className="mt-1" />
+                          </div>
+                        ) : drawMode === 'sameDay' ? (
+                          <div>
+                            <Label className="text-xs" htmlFor="drawDay">Dia do Mês</Label>
+                            <Input id="drawDay" type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="mt-1" />
+                          </div>
+                        ) : (
+                          <div>
+                            <Label className="text-xs">Exibição</Label>
+                            <Input readOnly value={new Date().toLocaleDateString('pt-BR')} className="mt-1" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
+                        <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 w-full sm:w-48" />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                  {activeTab === 'facebook' && (
-                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                      <h2 className="text-base font-bold text-gray-800 mb-3">Facebook Pixel / CAPI</h2>
+                {/* Facebook */}
+                {activeTab === 'facebook' && (
+                  <Card className="border border-gray-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-base">Facebook Pixel / CAPI</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
                           <div>
@@ -362,20 +341,28 @@ export default function AdminPage() {
                       </div>
                       <div className="mt-3 grid grid-cols-1 gap-2">
                         <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Pixel ID</label>
-                          <input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                          <Label className="text-xs">Pixel ID</Label>
+                          <Input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="mt-1" />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Token API Conversões</label>
-                          <input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                          <Label className="text-xs">Token API Conversões</Label>
+                          <Input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="mt-1" />
                         </div>
                       </div>
-                    </div>
-                  )}
+                      <div className="flex justify-end mt-3">
+                        <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                  {activeTab === 'utmify' && (
-                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                      <h2 className="text-base font-bold text-gray-800 mb-3">Utmify</h2>
+                {/* Utmify */}
+                {activeTab === 'utmify' && (
+                  <Card className="border border-gray-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-base">Utmify</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                       <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
                         <div>
                           <p className="text-xs font-semibold text-gray-800">Ativar Utmify</p>
@@ -384,87 +371,87 @@ export default function AdminPage() {
                       </div>
                       <div className="mt-3 grid grid-cols-1 gap-2">
                         <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Token</label>
-                          <input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                          <Label className="text-xs">Token</Label>
+                          <Input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="mt-1" />
                         </div>
                       </div>
-                    </div>
-                  )}
+                      <div className="flex justify-end mt-3">
+                        <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                  {activeTab === 'purchases' && (
-                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                      <h2 className="text-base font-bold text-gray-800 mb-1">Compras</h2>
-                      <p className="text-xs text-gray-600 mb-3">Ordenado por mais recentes. Use os botões para navegar.</p>
+                {/* Compras */}
+                {activeTab === 'purchases' && (
+                  <Card className="border border-gray-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-base">Compras</CardTitle>
+                      <p className="text-xs text-gray-600">Ordenado por mais recentes. Use os botões para navegar.</p>
+                    </CardHeader>
+                    <CardContent>
                       <div className="flex items-center gap-2 mb-3">
-                        <button type="button" onClick={async () => {
+                        <Button type="button" onClick={async () => {
                           setPurchasesLoading(true);
                           try {
                             const res = await fetch(`/api/admin/purchases?page=${purchasesPage}&pageSize=20`, { cache: 'no-store' });
                             const json = await res.json();
                             if (json?.success) { setPurchases(json.items || []); setPurchasesTotal(json.total || 0); }
                           } finally { setPurchasesLoading(false); }
-                        }} className="px-3 py-1.5 rounded-md bg-black text-white text-xs font-semibold shadow hover:bg-gray-900">Atualizar</button>
+                        }} size="sm">Atualizar</Button>
                         <span className="text-[12px] text-gray-600">Página {purchasesPage} de {Math.max(1, Math.ceil(purchasesTotal / 20))}</span>
                         <div className="ml-auto flex gap-2">
-                          <button type="button" disabled={purchasesPage<=1} onClick={() => setPurchasesPage((p) => Math.max(1, p-1))} className="px-2.5 py-1.5 rounded-md bg-gray-100 text-gray-800 text-xs disabled:opacity-50 hover:bg-gray-200">Anterior</button>
-                          <button type="button" disabled={purchasesPage>=Math.max(1, Math.ceil(purchasesTotal/20))} onClick={() => setPurchasesPage((p) => p+1)} className="px-2.5 py-1.5 rounded-md bg-gray-100 text-gray-800 text-xs disabled:opacity-50 hover:bg-gray-200">Próxima</button>
+                          <Button type="button" variant="secondary" size="sm" disabled={purchasesPage<=1} onClick={() => setPurchasesPage((p) => Math.max(1, p-1))}>Anterior</Button>
+                          <Button type="button" variant="secondary" size="sm" disabled={purchasesPage>=Math.max(1, Math.ceil(purchasesTotal/20))} onClick={() => setPurchasesPage((p) => p+1)}>Próxima</Button>
                         </div>
                       </div>
                       <div className="rounded-lg overflow-hidden border border-gray-100">
                         <div className="overflow-x-auto">
                           <div className="min-w-[760px]">
-                            <div className="grid grid-cols-12 bg-gray-50 px-3 py-2 text-[11px] font-bold tracking-wide text-gray-600 uppercase">
-                              <div className="col-span-2">Status</div>
-                              <div className="col-span-4">Cliente</div>
-                              <div className="col-span-3">Transação</div>
-                              <div className="col-span-2">Quantidade</div>
-                              <div className="col-span-1 text-right">Valor</div>
-                            </div>
-                            {purchasesLoading ? (
-                              <div className="px-3 py-4 text-xs text-gray-500">Carregando...</div>
-                            ) : purchases.length === 0 ? (
-                              <div className="px-3 py-4 text-xs text-gray-500">Nenhuma compra encontrada.</div>
-                            ) : (
-                              <ul className="divide-y divide-gray-100">
-                                {purchases.map((c) => {
-                                  const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                                  const statusPill = c.status === 'paid'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-yellow-100 text-yellow-800';
-                                  return (
-                                    <li key={c.id} className="grid grid-cols-12 px-3 py-2.5 text-[12px] text-gray-800 hover:bg-gray-50">
-                                      <div className="col-span-2">
-                                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${statusPill}`}>{c.status}</span>
-                                      </div>
-                                      <div className="col-span-4 truncate">
-                                        <div className="font-semibold truncate">{c.clientes?.nome || '—'}</div>
-                                        <div className="text-[11px] text-gray-500 truncate">{c.clientes?.email || ''}</div>
-                                      </div>
-                                      <div className="col-span-3 truncate font-mono text-[12px]">{c.transaction_id}</div>
-                                      <div className="col-span-2">{c.quantidade_bilhetes}</div>
-                                      <div className="col-span-1 text-right">{valor}</div>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            )}
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Status</TableHead>
+                                  <TableHead>Cliente</TableHead>
+                                  <TableHead>Transação</TableHead>
+                                  <TableHead>Quantidade</TableHead>
+                                  <TableHead className="text-right">Valor</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {purchasesLoading ? (
+                                  <TableRow><TableCell colSpan={5} className="text-xs text-gray-500">Carregando...</TableCell></TableRow>
+                                ) : purchases.length === 0 ? (
+                                  <TableRow><TableCell colSpan={5} className="text-xs text-gray-500">Nenhuma compra encontrada.</TableCell></TableRow>
+                                ) : (
+                                  purchases.map((c) => {
+                                    const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                    const badgeClass = c.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                                    return (
+                                      <TableRow key={c.id} className="hover:bg-gray-50">
+                                        <TableCell><Badge className={badgeClass}>{c.status}</Badge></TableCell>
+                                        <TableCell>
+                                          <div className="font-semibold truncate max-w-[220px]">{c.clientes?.nome || '—'}</div>
+                                          <div className="text-[11px] text-gray-500 truncate max-w-[220px]">{c.clientes?.email || ''}</div>
+                                        </TableCell>
+                                        <TableCell className="font-mono text-[12px] truncate max-w-[160px]">{c.transaction_id}</TableCell>
+                                        <TableCell>{c.quantidade_bilhetes}</TableCell>
+                                        <TableCell className="text-right">{valor}</TableCell>
+                                      </TableRow>
+                                    );
+                                  })
+                                )}
+                              </TableBody>
+                            </Table>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </CardContent>
+                  </Card>
+                )}
+              </Tabs>
 
-                  {activeTab !== 'purchases' && (
-                    <div className="lg:hidden">
-                      <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
-                        {loading ? 'Salvando...' : 'Salvar alterações'}
-                      </button>
-                    </div>
-                  )}
-                </form>
-
-                {message && <div className="text-sm text-center text-gray-700 mt-2">{message}</div>}
-              </div>
+              {message && <div className="text-sm text-center text-gray-700 mt-2">{message}</div>}
             </div>
           </>
         )}
