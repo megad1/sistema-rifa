@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [fbCapiToken, setFbCapiToken] = useState('');
   const [utmEnabled, setUtmEnabled] = useState(false);
   const [utmToken, setUtmToken] = useState('');
+  const [activeTab, setActiveTab] = useState<'campaign' | 'facebook' | 'utmify' | 'purchases'>('campaign');
 
   useEffect(() => {
     (async () => {
@@ -170,151 +171,194 @@ export default function AdminPage() {
           </div>
         ) : (
           <>
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
-                <p className="text-xs text-gray-600">Gerencie as configurações da campanha e integrações.</p>
-              </div>
-              <div className="hidden lg:block">
-                <button onClick={(e) => { e.preventDefault(); const form = document.getElementById('admin-form') as HTMLFormElement | null; form?.requestSubmit(); }} disabled={loading} className="px-4 py-2 rounded-md bg-black text-white font-bold disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
-                  {loading ? 'Salvando...' : 'Salvar alterações'}
-                </button>
+            <div className="flex items-start gap-4">
+              {/* Sidebar */}
+              <aside className="hidden lg:block w-64 shrink-0">
+                <div className="bg-white rounded-lg shadow border border-gray-200 p-3">
+                  <h2 className="text-sm font-bold text-gray-800 mb-2">Menu</h2>
+                  <nav className="space-y-1">
+                    <button type="button" onClick={() => setActiveTab('campaign')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='campaign' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
+                      <i className="bi bi-gear me-1"></i> Configurações
+                    </button>
+                    <button type="button" onClick={() => setActiveTab('facebook')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='facebook' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
+                      <i className="bi bi-meta me-1"></i> Facebook Pixel
+                    </button>
+                    <button type="button" onClick={() => setActiveTab('utmify')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='utmify' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
+                      <i className="bi bi-diagram-3 me-1"></i> Utmify
+                    </button>
+                    <button type="button" onClick={() => setActiveTab('purchases')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='purchases' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
+                      <i className="bi bi-receipt me-1"></i> Compras (em breve)
+                    </button>
+                  </nav>
+                </div>
+              </aside>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
+                    <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e em breve veja as compras.</p>
+                  </div>
+                  <div className="hidden lg:block">
+                    <button onClick={(e) => { e.preventDefault(); const form = document.getElementById('admin-form') as HTMLFormElement | null; form?.requestSubmit(); }} disabled={loading} className="px-4 py-2 rounded-md bg-black text-white font-bold disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
+                      {loading ? 'Salvando...' : 'Salvar alterações'}
+                    </button>
+                  </div>
+                </div>
+
+                <form id="admin-form" className="space-y-4" onSubmit={handleSave}>
+                  {activeTab === 'campaign' && (
+                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
+                      <h2 className="text-base font-bold text-gray-800 mb-3">Configurações da Campanha</h2>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Título</label>
+                          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
+                          <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-800 mb-1">Logo</label>
+                            <select value={logoMode} onChange={(e) => setLogoMode(e.target.value as 'text' | 'image')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                              <option value="text">Texto</option>
+                              <option value="image">Imagem (URL)</option>
+                            </select>
+                          </div>
+                          {logoMode === 'text' ? (
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-800 mb-1">Texto da Logo</label>
+                              <input value={logoText} onChange={(e) => setLogoText(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                            </div>
+                          ) : (
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem da Logo</label>
+                              <input value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem do Banner</label>
+                          <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                          {imageUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
+                            <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-800 mb-1">Modo do Sorteio</label>
+                            <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay' | 'today')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                              <option value="today">Hoje (data atual)</option>
+                              <option value="fixedDate">Data fixa</option>
+                              <option value="sameDay">Mesmo dia de todo mês</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {drawMode === 'fixedDate' ? (
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-800 mb-1">Data do Sorteio</label>
+                              <input type="date" value={drawDate} onChange={(e) => setDrawDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                            </div>
+                          ) : drawMode === 'sameDay' ? (
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-800 mb-1">Dia do Mês</label>
+                              <input type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                            </div>
+                          ) : (
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-800 mb-1">Exibição</label>
+                              <input value={new Date().toLocaleDateString('pt-BR')} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-500 bg-gray-100" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'facebook' && (
+                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
+                      <h2 className="text-base font-bold text-gray-800 mb-3">Facebook Pixel / CAPI</h2>
+                      <div className="grid grid-cols-1 gap-3">
+                        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
+                          <div>
+                            <p className="text-xs font-semibold text-gray-800">Ativar Pixel</p>
+                          </div>
+                          <ToggleSwitch checked={fbEnabled} onChange={setFbEnabled} label="Ativar Pixel" />
+                        </div>
+                        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
+                          <div>
+                            <p className="text-xs font-semibold text-gray-800">Enviar Purchase</p>
+                          </div>
+                          <ToggleSwitch checked={fbSendPurchase} onChange={setFbSendPurchase} label="Enviar Purchase" />
+                        </div>
+                      </div>
+                      <div className="mt-3 grid grid-cols-1 gap-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Pixel ID</label>
+                          <input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Token API Conversões</label>
+                          <input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'utmify' && (
+                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
+                      <h2 className="text-base font-bold text-gray-800 mb-3">Utmify</h2>
+                      <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
+                        <div>
+                          <p className="text-xs font-semibold text-gray-800">Ativar Utmify</p>
+                        </div>
+                        <ToggleSwitch checked={utmEnabled} onChange={setUtmEnabled} label="Ativar Utmify" />
+                      </div>
+                      <div className="mt-3 grid grid-cols-1 gap-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Token</label>
+                          <input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'purchases' && (
+                    <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
+                      <h2 className="text-base font-bold text-gray-800 mb-3">Compras (em breve)</h2>
+                      <div className="text-xs text-gray-600 mb-3">Em uma próxima versão, este painel mostrará as compras com filtros por status, cliente e período.</div>
+                      <div className="border rounded-md overflow-hidden">
+                        <div className="grid grid-cols-12 bg-gray-50 p-2 text-[12px] font-semibold text-gray-700">
+                          <div className="col-span-3">Cliente</div>
+                          <div className="col-span-3">Transação</div>
+                          <div className="col-span-2">Quantidade</div>
+                          <div className="col-span-2">Valor</div>
+                          <div className="col-span-2 text-right">Status</div>
+                        </div>
+                        <div className="p-3 text-xs text-gray-500">Nenhum dado para exibir.</div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="lg:hidden">
+                    <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
+                      {loading ? 'Salvando...' : 'Salvar alterações'}
+                    </button>
+                  </div>
+                </form>
+
+                {message && <div className="text-sm text-center text-gray-700 mt-2">{message}</div>}
               </div>
             </div>
-
-            <form id="admin-form" className="grid grid-cols-12 gap-4" onSubmit={handleSave}>
-              <div className="col-span-12 lg:col-span-8">
-                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                  <h2 className="text-base font-bold text-gray-800 mb-3">Configurações da Campanha</h2>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">Título</label>
-                      <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
-                      <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-800 mb-1">Logo</label>
-                        <select value={logoMode} onChange={(e) => setLogoMode(e.target.value as 'text' | 'image')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
-                          <option value="text">Texto</option>
-                          <option value="image">Imagem (URL)</option>
-                        </select>
-                      </div>
-                      {logoMode === 'text' ? (
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Texto da Logo</label>
-                          <input value={logoText} onChange={(e) => setLogoText(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                        </div>
-                      ) : (
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem da Logo</label>
-                          <input value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem do Banner</label>
-                      <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                      {imageUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
-                        <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-800 mb-1">Modo do Sorteio</label>
-                        <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay' | 'today')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
-                          <option value="today">Hoje (data atual)</option>
-                          <option value="fixedDate">Data fixa</option>
-                          <option value="sameDay">Mesmo dia de todo mês</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {drawMode === 'fixedDate' ? (
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Data do Sorteio</label>
-                          <input type="date" value={drawDate} onChange={(e) => setDrawDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                        </div>
-                      ) : drawMode === 'sameDay' ? (
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Dia do Mês</label>
-                          <input type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                        </div>
-                      ) : (
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-800 mb-1">Exibição</label>
-                          <input value={new Date().toLocaleDateString('pt-BR')} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-500 bg-gray-100" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-12 lg:col-span-4">
-                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                  <h2 className="text-base font-bold text-gray-800 mb-3">Facebook Pixel / CAPI</h2>
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-800">Ativar Pixel</p>
-                      </div>
-                      <ToggleSwitch checked={fbEnabled} onChange={setFbEnabled} label="Ativar Pixel" />
-                    </div>
-                    <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-800">Enviar Purchase</p>
-                      </div>
-                      <ToggleSwitch checked={fbSendPurchase} onChange={setFbSendPurchase} label="Enviar Purchase" />
-                    </div>
-                  </div>
-                  <div className="mt-3 grid grid-cols-1 gap-2">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">Pixel ID</label>
-                      <input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">Token API Conversões</label>
-                      <input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-12 lg:col-span-4">
-                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                  <h2 className="text-base font-bold text-gray-800 mb-3">Utmify</h2>
-                  <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800">Ativar Utmify</p>
-                    </div>
-                    <ToggleSwitch checked={utmEnabled} onChange={setUtmEnabled} label="Ativar Utmify" />
-                  </div>
-                  <div className="mt-3 grid grid-cols-1 gap-2">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">Token</label>
-                      <input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-12 lg:hidden">
-                <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
-                  {loading ? 'Salvando...' : 'Salvar alterações'}
-                </button>
-              </div>
-            </form>
-
-            {message && <div className="text-sm text-center text-gray-700 mt-2">{message}</div>}
           </>
         )}
       </div>
