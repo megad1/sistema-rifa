@@ -92,9 +92,11 @@ export default function RoletaPage() {
               </span>
             </h1>
             <p className="mt-1 text-base sm:text-lg text-gray-700 font-semibold">Gire a roleta e boa sorte!</p>
-            <div className="mt-3 sm:mt-4 grid grid-cols-1 gap-2">
-              <div className="bg-gray-100 rounded-md px-3 py-1 text-sm font-semibold text-gray-700 text-right">
-                Giros restantes: <span className="text-gray-900">{balance}</span>
+            <div className="mt-3 sm:mt-4">
+              <div className="flex justify-end">
+                <div className="inline-flex items-center bg-gray-100 rounded-md px-3 py-1 text-sm font-semibold text-gray-700">
+                  Giros restantes: <span className="ml-1 text-gray-900">{balance}</span>
+                </div>
               </div>
             </div>
           </div>
