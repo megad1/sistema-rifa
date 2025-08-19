@@ -276,9 +276,29 @@ export default function WinwheelRoulette({
           const resp = await fetch('/api/roulette/spin', hasCpf ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: playerCpf!.replace(/\D/g, '') }) } : { method: 'POST' });
           if (!resp.ok) throw new Error('spin_http_error');
           const data: { success?: boolean; stopAngle?: number; idx?: number; label?: string } = await resp.json();
-          if (!data || !data.success || typeof data.stopAngle !== 'number') throw new Error('spin_invalid_response');
-          newWheel.animation.stopAngle = data.stopAngle;
-          selectedIdxRef.current = typeof data.idx === 'number' ? data.idx : null;
+          if (!data || !data.success) throw new Error('spin_invalid_response');
+          // Força o alvo com base no label/idx usando o mapeamento local para garantir alinhamento visual
+          const sizes = sizesDegRef.current;
+          const base = baseStartDegRef.current;
+          let idx: number | null = null;
+          if (typeof data.idx === 'number' && data.idx >= 0 && data.idx < sizes.length) idx = data.idx;
+          if (data.label) {
+            const found = segmentsRef.current.findIndex(s => (s.text || '').toLowerCase() === data.label!.toLowerCase());
+            if (found >= 0) idx = found;
+          }
+          if (idx !== null) {
+            let start = base;
+            for (let i = 0; i < idx; i += 1) start = (start + sizes[i]) % 360;
+            const angleWithin = sizes[idx] / 2;
+            const target = (start + angleWithin) % 360;
+            newWheel.animation.stopAngle = target;
+            selectedIdxRef.current = idx;
+          } else if (typeof data.stopAngle === 'number') {
+            newWheel.animation.stopAngle = data.stopAngle;
+            selectedIdxRef.current = null;
+          } else {
+            throw new Error('spin_invalid_target');
+          }
         } catch (e) {
           setIsSpinning(false);
           return;

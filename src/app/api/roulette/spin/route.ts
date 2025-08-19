@@ -69,8 +69,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'decrement_error' }, { status: 500 });
     }
 
-    // Sorteio seguro no servidor
-    const idx = Math.floor(Math.random() * SIZES_DEG.length);
+    // Força cair em "TENTE OUTRA VEZ" (índices 1 ou 4)
+    const candidates = [1, 4];
+    const idx = candidates[Math.floor(Math.random() * candidates.length)];
 
     // Calcula o início do segmento escolhido
     let start = BASE_START_DEG;
