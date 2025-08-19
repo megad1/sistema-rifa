@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const runtime = 'nodejs';
 
 // Concede giros para um CPF (usa no pós-pagamento). Idempotente: soma ao saldo existente.
 export async function POST(request: Request) {

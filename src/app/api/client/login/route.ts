@@ -5,6 +5,7 @@ import { buildLoginCookie } from '@/lib/clientAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
@@ -20,6 +21,9 @@ export async function POST(request: Request) {
       .single();
     if (error || !cliente) return NextResponse.json({ success: false, message: 'cliente_not_found' }, { status: 404 });
 
+    if (!process.env.CLIENT_SESSION_SECRET) {
+      return NextResponse.json({ success: false, message: 'CLIENT_SESSION_SECRET ausente no servidor.' }, { status: 500 });
+    }
     const res = NextResponse.json({ success: true, cliente: { id: cliente.id, nome: cliente.nome, email: cliente.email } });
     res.headers.append('Set-Cookie', buildLoginCookie(String(cliente.id)));
     return res;
