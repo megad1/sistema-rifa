@@ -31,10 +31,21 @@ interface TweenMaxLike {
   killAll?: (a?: boolean, b?: boolean, c?: boolean) => void;
 }
 
+// Tipagem mínima para o canvas-confetti (carregado via script na página)
+interface ConfettiOptions {
+  particleCount?: number;
+  spread?: number;
+  startVelocity?: number;
+  origin?: { x?: number; y?: number };
+  ticks?: number;
+  scalar?: number;
+}
+
 declare global {
   interface Window {
     Winwheel?: WinwheelCtor;
     TweenMax?: TweenMaxLike;
+    confetti?: (opts: ConfettiOptions) => void;
   }
 }
 
@@ -210,9 +221,8 @@ export default function WinwheelRoulette({
 
   function fireConfettiIfWin(label: string) {
     try {
-      // @ts-ignore confetti global fornecido via script em /roleta/page.tsx
-      const confetti = (window as any).confetti as undefined | ((opts: any) => void);
-      if (!confetti) return;
+      const confetti = window.confetti;
+      if (typeof confetti !== 'function') return;
       if (/TENTE/i.test(label)) return; // Não dispara para "TENTE OUTRA VEZ"
       const burst = (particleCount: number, spread: number, startVelocity: number, scalar = 1) => {
         confetti({ particleCount, spread, startVelocity, origin: { y: 0.3 }, ticks: 200, scalar });
@@ -284,7 +294,7 @@ export default function WinwheelRoulette({
       let data: { success?: boolean; stopAngle?: number; idx?: number; label?: string };
       try {
         data = await outcomePromise;
-      } catch (e) {
+      } catch {
         // Falha de backend: interrompe pré-rotação e aborta
         preWheel.stopAnimation(false);
         setIsSpinning(false);
