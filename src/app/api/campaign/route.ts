@@ -15,6 +15,7 @@ type CampaignSettings = {
   drawMode: 'fixedDate' | 'sameDay' | 'today';
   drawDate: string | null;
   drawDay: number | null;
+  minQuantity: number;
 };
 
 const DEFAULT_SETTINGS: CampaignSettings = {
@@ -28,6 +29,7 @@ const DEFAULT_SETTINGS: CampaignSettings = {
   drawMode: 'today',
   drawDate: null,
   drawDay: null,
+  minQuantity: 15,
 };
 
 export async function GET() {

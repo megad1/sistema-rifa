@@ -24,6 +24,7 @@ export default function AdminPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [ticketPrice, setTicketPrice] = useState<number>(0.11);
+  const [minQuantity, setMinQuantity] = useState<number>(15);
   const [drawMode, setDrawMode] = useState<'fixedDate' | 'sameDay' | 'today'>('today');
   const [drawDate, setDrawDate] = useState<string>('');
   const [drawDay, setDrawDay] = useState<number>(9);
@@ -62,6 +63,7 @@ export default function AdminPage() {
           if (json.settings.logoMode === 'text' || json.settings.logoMode === 'image') setLogoMode(json.settings.logoMode);
           if (typeof json.settings.logoText === 'string') setLogoText(json.settings.logoText);
           if (typeof json.settings.logoImageUrl === 'string') setLogoImageUrl(json.settings.logoImageUrl);
+          if (typeof json.settings.minQuantity === 'number') setMinQuantity(json.settings.minQuantity);
         }
         // Só tenta buscar integrações se já autenticado
         const cookieHasAdmin = document.cookie.includes('__Host-admin_session=');
@@ -144,7 +146,7 @@ export default function AdminPage() {
       const res = await fetch('/api/campaign/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, imageUrl, subtitle, ticketPrice, drawMode, drawDate: drawDate || null, drawDay, logoMode, logoText, logoImageUrl }),
+        body: JSON.stringify({ title, imageUrl, subtitle, ticketPrice, drawMode, drawDate: drawDate || null, drawDay, logoMode, logoText, logoImageUrl, minQuantity }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message || 'Falha ao salvar');
@@ -386,6 +388,10 @@ export default function AdminPage() {
                           <div className="md:col-span-3">
                             <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
                             <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 h-10" />
+                          </div>
+                          <div className="md:col-span-3">
+                            <Label className="text-xs" htmlFor="minQty">Qtd. mínima de cotas</Label>
+                            <Input id="minQty" type="number" min={1} value={minQuantity} onChange={(e) => setMinQuantity(Math.max(1, parseInt(e.target.value || '1', 10)))} className="mt-1 h-10" />
                           </div>
                         </div>
                       </CardContent>

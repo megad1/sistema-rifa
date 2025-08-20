@@ -16,9 +16,10 @@ export async function POST(request: Request) {
         } = body;
 
         // --- Validação de Entrada ---
-        const MIN_QUANTITY = 15;
+        const campaign = await getCampaignSettings();
+        const MIN_QUANTITY = typeof campaign.minQuantity === 'number' ? Math.max(1, Math.floor(campaign.minQuantity)) : 15;
         if (!quantity || typeof quantity !== 'number' || quantity < MIN_QUANTITY) {
-            throw new Error('Quantidade mínima é 15.');
+            throw new Error(`Quantidade mínima é ${MIN_QUANTITY}.`);
         }
         if (!nome || !email || !cpf || !telefone) {
             throw new Error('Todos os campos são obrigatórios: nome, email, cpf e telefone.');
@@ -28,7 +29,6 @@ export async function POST(request: Request) {
         const cpf_limpo = limparCpf(cpf);
 
         // --- Cálculo de valor no SERVIDOR (fonte de verdade) ---
-        const campaign = await getCampaignSettings();
         const ticketPrice = typeof campaign.ticketPrice === 'number' ? campaign.ticketPrice : 0.11;
         const valor = quantity * ticketPrice;
         if (valor > MAX_PIX_TOTAL_BR) {

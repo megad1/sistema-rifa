@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     const drawMode: 'fixedDate' | 'sameDay' | undefined = body?.drawMode;
     const drawDate: string | null | undefined = body?.drawDate ?? undefined; // string ou null
     const drawDay: number | null | undefined = (typeof body?.drawDay === 'number' || body?.drawDay === null) ? body.drawDay : undefined;
+    const minQuantity: number | undefined = typeof body?.minQuantity === 'number' ? body.minQuantity : undefined;
 
     if (
       title === undefined &&
@@ -35,7 +36,8 @@ export async function POST(request: Request) {
       drawDay === undefined &&
       logoMode === undefined &&
       logoText === undefined &&
-      logoImageUrl === undefined
+      logoImageUrl === undefined &&
+      minQuantity === undefined
     ) {
       return NextResponse.json({ success: false, message: 'Nenhum campo para atualizar.' }, { status: 400 });
     }
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
     if (drawMode !== undefined) payload.drawMode = drawMode;
     if (drawDate !== undefined) payload.drawDate = drawDate;
     if (drawDay !== undefined) payload.drawDay = drawDay;
+    if (minQuantity !== undefined) payload.minQuantity = Math.max(1, Math.floor(minQuantity));
 
     const { error } = await supabaseAdmin
       .from('settings')

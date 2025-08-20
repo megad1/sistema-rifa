@@ -10,6 +10,7 @@ export type CampaignSettings = {
   drawMode: 'fixedDate' | 'sameDay' | 'today';
   drawDate: string | null; // ISO date (YYYY-MM-DD)
   drawDay: number | null; // 1..31
+  minQuantity: number; // quantidade mínima de cotas
 };
 
 const DEFAULT_SETTINGS: CampaignSettings = {
@@ -23,6 +24,7 @@ const DEFAULT_SETTINGS: CampaignSettings = {
   drawMode: 'today',
   drawDate: null,
   drawDay: null,
+  minQuantity: 15,
 };
 
 import { supabaseAdmin } from '@/lib/supabase';
