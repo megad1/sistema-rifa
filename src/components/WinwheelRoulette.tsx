@@ -208,6 +208,21 @@ export default function WinwheelRoulette({
     };
   }, []); // inicializar apenas uma vez (evita reiniciar a roleta durante o ciclo)
 
+  function fireConfettiIfWin(label: string) {
+    try {
+      // @ts-ignore confetti global fornecido via script em /roleta/page.tsx
+      const confetti = (window as any).confetti as undefined | ((opts: any) => void);
+      if (!confetti) return;
+      if (/TENTE/i.test(label)) return; // Não dispara para "TENTE OUTRA VEZ"
+      const burst = (particleCount: number, spread: number, startVelocity: number, scalar = 1) => {
+        confetti({ particleCount, spread, startVelocity, origin: { y: 0.3 }, ticks: 200, scalar });
+      };
+      burst(80, 70, 35, 1.0);
+      setTimeout(() => burst(120, 100, 45, 0.9), 180);
+      setTimeout(() => burst(80, 60, 30, 1.1), 360);
+    } catch {}
+  }
+
   const handleSpin = async () => {
     if (!wheelInstanceRef.current || isSpinning || !ready || !imageLoaded || disabled) return;
     const allow = onSpinStartRef.current ? onSpinStartRef.current() : true;
@@ -323,6 +338,7 @@ export default function WinwheelRoulette({
                 const pickedIdx = selectedIdxRef.current;
                 const safeText = (pickedIdx !== null && segmentsRef.current[pickedIdx]) ? (segmentsRef.current[pickedIdx].text ?? seg.text) : seg.text;
                 setMessage(safeText ?? '');
+                fireConfettiIfWin(safeText ?? seg.text ?? '');
                 if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
               }
             } finally {

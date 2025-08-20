@@ -80,6 +80,8 @@ export default function RoletaPage() {
       <Script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js" strategy="afterInteractive" />
       {/* Winwheel.js via CDN - expõe window.Winwheel */}
       <Script src="https://cdn.jsdelivr.net/gh/zarocknz/javascript-winwheel/Winwheel.min.js" strategy="afterInteractive" />
+      {/* Confetti */}
+      <Script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" strategy="afterInteractive" />
 
       <Header />
 
