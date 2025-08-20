@@ -20,6 +20,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
   const [spinsBump, setSpinsBump] = useState(false);
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp ?? '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp ?? '');
+  const MIN_QUANTITY = 15;
   const MAX_QUANTITY = 200;
 
   useEffect(() => {
@@ -69,14 +70,14 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
   const handleAddQuantity = (amount: number) => {
     setQuantity(current => {
       const next = current + amount;
-      if (next < 0) return 0;
+      if (next < MIN_QUANTITY) return MIN_QUANTITY;
       if (next > MAX_QUANTITY) return MAX_QUANTITY;
       return next;
     });
   };
   
   const resetQuantity = () => {
-    setQuantity(0);
+    setQuantity(MIN_QUANTITY);
   }
 
   const handleOpenModal = () => {
@@ -162,7 +163,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                         <button onClick={resetQuantity} className="text-gray-500 hover:text-black text-lg px-2">
                             <i className="bi bi-x-circle"></i>
                         </button>
-                        <button onClick={() => handleAddQuantity(-1)} className="text-gray-500 hover:text-black text-xl px-2">
+                        <button onClick={() => handleAddQuantity(-1)} disabled={quantity <= MIN_QUANTITY} className="text-gray-500 hover:text-black text-xl px-2 disabled:opacity-40 disabled:cursor-not-allowed">
                             <i className="bi bi-dash-circle"></i>
                         </button>
                     </div>

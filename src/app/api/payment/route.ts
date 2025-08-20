@@ -16,8 +16,9 @@ export async function POST(request: Request) {
         } = body;
 
         // --- Validação de Entrada ---
-        if (!quantity || typeof quantity !== 'number' || quantity <= 0) {
-            throw new Error('Quantidade é obrigatória e deve ser maior que zero.');
+        const MIN_QUANTITY = 15;
+        if (!quantity || typeof quantity !== 'number' || quantity < MIN_QUANTITY) {
+            throw new Error('Quantidade mínima é 15.');
         }
         if (!nome || !email || !cpf || !telefone) {
             throw new Error('Todos os campos são obrigatórios: nome, email, cpf e telefone.');
