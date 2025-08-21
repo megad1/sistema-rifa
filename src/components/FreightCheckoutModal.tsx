@@ -3,16 +3,15 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FREIGHT_OPTIONS_BR } from '@/config/payments';
 
-type Props = {
-  onClose: () => void;
-  onPix: (data: { token: string; pixCopiaECola: string; qrCodeUrl: string; valor: number }) => void;
-};
+type PixData = { token: string; pixCopiaECola: string; qrCodeUrl: string; valor: number };
+type Props = { onClose: () => void; onPix?: (data: PixData) => void };
 
 export default function FreightCheckoutModal({ onClose, onPix }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [freightId, setFreightId] = useState<string>(FREIGHT_OPTIONS_BR[0]?.id || 'pac');
+  const [pix, setPix] = useState<PixData | null>(null);
 
   const [form, setForm] = useState({
     nome: '',
@@ -47,7 +46,9 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
       });
       const data = await resp.json();
       if (!resp.ok || !data?.success) throw new Error(data?.message || 'Erro ao gerar Pix do frete.');
-      onPix({ token: data.token, pixCopiaECola: data.pixCopiaECola, qrCodeUrl: data.qrCodeUrl, valor: data.valor });
+      const payload: PixData = { token: data.token, pixCopiaECola: data.pixCopiaECola, qrCodeUrl: data.qrCodeUrl, valor: data.valor };
+      setPix(payload);
+      onPix?.(payload);
       setStep(2);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido.');
@@ -112,16 +113,16 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
           </form>
         )}
 
-        {step === 2 && (
+        {step === 2 && pix && (
           <div className="p-5 space-y-3 text-center">
             <h4 className="text-lg font-extrabold text-green-600">Pagamento do frete</h4>
             <p className="text-sm text-gray-700">Escaneie o QR Code ou copie o código Pix</p>
             <div className="flex justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={(onPix as any)._last?.qrCodeUrl || ''} alt="QR Code" className="w-48 h-48 object-contain" />
+              <img src={pix.qrCodeUrl} alt="QR Code" className="w-48 h-48 object-contain" />
             </div>
             <div className="bg-gray-100 rounded p-2 text-xs break-all">
-              {(onPix as any)._last?.pixCopiaECola || ''}
+              {pix.pixCopiaECola}
             </div>
             <div className="flex justify-center">
               <button onClick={onClose} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700">Fechar</button>

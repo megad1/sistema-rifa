@@ -105,7 +105,7 @@ export async function POST(request: Request) {
       freight: { id: freight.id, label: freight.label },
       address: { cep, endereco, numero, complemento, bairro, cidade, estado },
     });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, message: 'Erro interno.' }, { status: 500 });
   }
 }

@@ -22,7 +22,7 @@ export default function RoletaPage() {
   const [winLabel, setWinLabel] = useState<string | null>(null);
   const [showWinModal, setShowWinModal] = useState<boolean>(false);
   const [showShippingModal, setShowShippingModal] = useState<boolean>(false);
-  const [pixData, setPixData] = useState<{ token: string; pixCopiaECola: string; qrCodeUrl: string; valor: number } | null>(null);
+  // Removido uso direto por enquanto; modal gerencia o estado do PIX
 
   const fetchBalance = useCallback(async (cpfOptional?: string) => {
     setLoading(true);
