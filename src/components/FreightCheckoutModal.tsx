@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import { FREIGHT_OPTIONS_BR } from '@/config/payments';
 
 type PixData = { token: string; pixCopiaECola: string; qrCodeUrl: string; valor: number };
-type Props = { onClose: () => void; onPix?: (data: PixData) => void };
+type Props = { onClose: () => void; onPix?: (data: PixData) => void; bannerImage?: string; prizeLabel?: string };
 
-export default function FreightCheckoutModal({ onClose, onPix }: Props) {
-  const [step, setStep] = useState<1 | 2>(1);
+export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/roleta.png', prizeLabel }: Props) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [freightId, setFreightId] = useState<string>(FREIGHT_OPTIONS_BR[0]?.id || 'pac');
@@ -97,7 +98,20 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
     } catch {}
   };
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  const handleContinueToFreight = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    // validações básicas
+    const digits = (s: string) => s.replace(/\D/g, '');
+    if (!form.nome || !form.email) { setError('Preencha nome e e-mail.'); return; }
+    if (digits(form.cpf).length !== 11) { setError('CPF inválido.'); return; }
+    const telLen = digits(form.telefone).length; if (telLen < 10 || telLen > 11) { setError('Telefone inválido.'); return; }
+    if (digits(form.cep).length !== 8) { setError('CEP inválido.'); return; }
+    if (!form.endereco || !form.numero || !form.bairro || !form.cidade || form.estado.length !== 2) { setError('Preencha endereço completo.'); return; }
+    setStep(2);
+  }, [form]);
+
+  const handleGeneratePix = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -112,7 +126,7 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
       const payload: PixData = { token: data.token, pixCopiaECola: data.pixCopiaECola, qrCodeUrl: data.qrCodeUrl, valor: data.valor };
       setPix(payload);
       onPix?.(payload);
-      setStep(2);
+      setStep(3);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido.');
     } finally {
@@ -129,9 +143,21 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
             <i className="bi bi-x text-2xl"></i>
           </button>
         </div>
+        <div className="p-2 space-y-2">
+          <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
+            <div className="relative w-24 h-16 shrink-0">
+              <Image src={bannerImage} alt="Prêmio" fill className="rounded-md object-cover" />
+            </div>
+            <div className="flex-1">
+              <p className="text-gray-700">
+                <b className="font-semibold text-gray-800">Resgate</b> do prêmio {prizeLabel ? <b className="font-semibold text-gray-800">{prizeLabel}</b> : null}
+              </p>
+            </div>
+          </div>
+        </div>
 
         {step === 1 && (
-          <form className="p-4 space-y-3" onSubmit={handleSubmit}>
+          <form className="p-4 space-y-3" onSubmit={handleContinueToFreight}>
             <div className="grid grid-cols-1 gap-3">
               <input name="nome" value={form.nome} onChange={handleChange} placeholder="Nome completo" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
               <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="E-mail" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
@@ -172,13 +198,39 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={onClose} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Cancelar</button>
               <button type="submit" disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
-                {loading ? 'Validando...' : 'Continuar para pagamento'}
+                {loading ? 'Validando...' : 'Continuar'}
               </button>
             </div>
           </form>
         )}
 
-        {step === 2 && pix && (
+        {step === 2 && (
+          <form className="p-4 space-y-3" onSubmit={handleGeneratePix}>
+            <p className="text-sm font-semibold">Escolha o frete</p>
+            <div className="space-y-2">
+              {FREIGHT_OPTIONS_BR.map(opt => (
+                <label key={opt.id} className="flex items-center justify-between border rounded px-3 py-2 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <input type="radio" name="frete" checked={freightId === opt.id} onChange={() => setFreightId(opt.id)} />
+                    <span className="text-sm">{opt.label}</span>
+                  </div>
+                  <span className="text-sm font-bold">R$ {opt.amount.toFixed(2)}</span>
+                </label>
+              ))}
+            </div>
+
+            {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-xs rounded-r-md">{error}</div>}
+
+            <div className="flex justify-between gap-2 pt-2">
+              <button type="button" onClick={() => setStep(1)} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Voltar</button>
+              <button type="submit" disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
+                {loading ? 'Gerando Pix...' : 'Continuar para pagamento'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {step === 3 && pix && (
           <div className="p-5 space-y-3 text-center">
             <h4 className="text-lg font-extrabold text-green-600">Pagamento do frete</h4>
             <p className="text-sm text-gray-700">Escaneie o QR Code ou copie o código Pix</p>
