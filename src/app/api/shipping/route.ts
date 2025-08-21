@@ -106,13 +106,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Não foi possível salvar o cliente.' }, { status: 500 });
     }
 
-    const tracking = {
+    const tracking: Record<string, unknown> = {
       kind: 'frete',
       freightId: freight.id,
       freightLabel: freight.label,
       produto: 'Frete prêmio roleta',
       address: { cep, endereco, numero, complemento, bairro, cidade, estado },
-    } as Record<string, unknown>;
+    };
 
     const { error: compraError } = await supabaseAdmin
       .from('compras')
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         quantidade_bilhetes: 1,
         valor_total: freight.amount,
         status: 'pending',
-        tracking_parameters: tracking as unknown as any,
+        tracking_parameters: tracking,
       });
     if (compraError) {
       return NextResponse.json({ success: false, message: 'Não foi possível registrar a compra.' }, { status: 500 });
