@@ -163,48 +163,67 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
         {step === 1 && (
           <form className="p-4 space-y-3" onSubmit={handleContinueToFreight}>
             <div className="grid grid-cols-1 gap-3">
-              <input name="nome" value={form.nome} onChange={handleChange} placeholder="Nome completo" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="E-mail" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-              <input name="cpf" value={form.cpf} onChange={handleChange} placeholder="CPF" inputMode="numeric" maxLength={14} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-              <input name="telefone" value={form.telefone} onChange={handleChange} placeholder="Telefone" inputMode="tel" maxLength={15} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-              <div className="grid grid-cols-2 gap-3">
-                <input name="cep" value={form.cep} onChange={handleChange} onBlur={onCepBlur} placeholder="CEP" inputMode="numeric" maxLength={9} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-                <input name="estado" value={form.estado} onChange={handleChange} placeholder="UF" maxLength={2} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-1">Nome Completo</label>
+                <input name="nome" value={form.nome} onChange={handleChange} placeholder="Seu nome completo" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
               </div>
-              <input name="endereco" value={form.endereco} onChange={handleChange} placeholder="Endereço" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-              <div className="grid grid-cols-2 gap-3">
-                <input name="numero" value={form.numero} onChange={handleChange} placeholder="Número" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-                <input name="complemento" value={form.complemento} onChange={handleChange} placeholder="Complemento" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-1">E-mail</label>
+                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="seu@email.com" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-1">CPF</label>
+                <input name="cpf" value={form.cpf} onChange={handleChange} placeholder="000.000.000-00" inputMode="numeric" maxLength={14} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-1">Telefone</label>
+                <input name="telefone" value={form.telefone} onChange={handleChange} placeholder="(00) 00000-0000" inputMode="tel" maxLength={15} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <input name="bairro" value={form.bairro} onChange={handleChange} placeholder="Bairro" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
-                <input name="cidade" value={form.cidade} onChange={handleChange} placeholder="Cidade" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">CEP</label>
+                  <input name="cep" value={form.cep} onChange={handleChange} onBlur={onCepBlur} placeholder="00000-000" inputMode="numeric" maxLength={9} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">UF</label>
+                  <input name="estado" value={form.estado} onChange={handleChange} placeholder="UF" maxLength={2} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+                </div>
               </div>
-
-              <div className="mt-2">
-                <p className="text-sm font-semibold mb-2">Escolha o frete</p>
-                <div className="space-y-2">
-                  {FREIGHT_OPTIONS_BR.map(opt => (
-                    <label key={opt.id} className="flex items-center justify-between border rounded px-3 py-2 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <input type="radio" name="frete" checked={freightId === opt.id} onChange={() => setFreightId(opt.id)} />
-                        <span className="text-sm">{opt.label}</span>
-                      </div>
-                      <span className="text-sm font-bold">R$ {opt.amount.toFixed(2)}</span>
-                    </label>
-                  ))}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-1">Endereço</label>
+                <input name="endereco" value={form.endereco} onChange={handleChange} placeholder="Rua, avenida..." className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">Número</label>
+                  <input name="numero" value={form.numero} onChange={handleChange} placeholder="Número" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">Complemento</label>
+                  <input name="complemento" value={form.complemento} onChange={handleChange} placeholder="Apto, bloco..." className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">Bairro</label>
+                  <input name="bairro" value={form.bairro} onChange={handleChange} placeholder="Bairro" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">Cidade</label>
+                  <input name="cidade" value={form.cidade} onChange={handleChange} placeholder="Cidade" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" />
                 </div>
               </div>
             </div>
 
             {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-xs rounded-r-md">{error}</div>}
 
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={onClose} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Cancelar</button>
-              <button type="submit" disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
-                {loading ? 'Validando...' : 'Continuar'}
-              </button>
-            </div>
+            <button type="submit" disabled={loading} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm">
+              {loading ? (
+                <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Validando...</span></>
+              ) : (
+                <><span>Continuar</span><i className="bi bi-arrow-right"></i></>
+              )}
+            </button>
           </form>
         )}
 
@@ -226,11 +245,15 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
             {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-xs rounded-r-md">{error}</div>}
 
             {!pix ? (
-              <div className="flex justify-between gap-2 pt-2">
-                <button type="button" onClick={() => setStep(1)} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Voltar</button>
-                <button type="submit" disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
-                  {loading ? 'Gerando Pix...' : 'Gerar Pix do frete'}
+              <div className="space-y-2 pt-2">
+                <button type="submit" disabled={loading} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm">
+                  {loading ? (
+                    <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Gerando Pix...</span></>
+                  ) : (
+                    <><span>Gerar Pix do frete</span><i className="bi bi-arrow-right"></i></>
+                  )}
                 </button>
+                <button type="button" onClick={() => setStep(1)} className="w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 text-sm">Voltar</button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -249,10 +272,8 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
                     <span>Copiar</span>
                   </button>
                 </div>
-                <div className="flex justify-between gap-2 pt-1">
-                  <button type="button" onClick={() => setPix(null)} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Alterar frete</button>
-                  <button type="button" onClick={onClose} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700">Fechar</button>
-                </div>
+                <button type="button" onClick={() => setPix(null)} className="w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 text-sm">Alterar frete</button>
+                <button type="button" onClick={onClose} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg text-sm">Fechar</button>
               </div>
             )}
           </form>
