@@ -284,11 +284,21 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
 function PixLikeCheckout({ pix, onClose }: { pix: PixData; onClose: () => void }) {
   const [showQr, setShowQr] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
+  const [checking, setChecking] = useState(false);
+  const [status, setStatus] = useState<'pending' | 'paid' | 'expired'>('pending');
   useEffect(() => {
     if (timeLeft <= 0) return; const t = setInterval(() => setTimeLeft((s) => s - 1), 1000); return () => clearInterval(t);
   }, [timeLeft]);
   const minutes = Math.max(0, Math.floor(timeLeft / 60));
   const seconds = Math.max(0, timeLeft % 60);
+  const verify = async () => {
+    try {
+      setChecking(true);
+      const r = await fetch('/api/shipping/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: pix.token }) });
+      const j = await r.json();
+      if (j?.success && j?.status === 'paid') setStatus('paid');
+    } finally { setChecking(false); }
+  };
   return (
     <div className="space-y-3">
       <div className="text-center text-sm text-gray-700">
@@ -323,7 +333,11 @@ function PixLikeCheckout({ pix, onClose }: { pix: PixData; onClose: () => void }
         <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">2</span><p>Abra o app do seu banco e escolha a opção PIX.</p></div>
         <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">3</span><p>Selecione PIX cópia e cola, cole a chave e confirme.</p></div>
       </div>
-      <button type="button" onClick={onClose} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg text-sm">Fechar</button>
+      {status === 'paid' ? (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center text-sm text-green-700 font-semibold">Pagamento confirmado</div>
+      ) : null}
+      <button type="button" onClick={verify} disabled={checking} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg text-sm disabled:opacity-60">{checking ? 'Verificando...' : 'Já fiz o pagamento'}</button>
+      <button type="button" onClick={onClose} className="w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 text-sm">Fechar</button>
     </div>
   );
 }
