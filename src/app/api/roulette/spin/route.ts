@@ -20,7 +20,7 @@ const SEGMENT_LABELS = [
   '15 MIL REAIS',
   'CARRO 0KM',
   'TENTE OUTRA VEZ',
-  '2 iPhone 16 Pro Max',
+  '2 iphones 16 pro max',
 ] as const;
 
 const SIZES_DEG = [60, 60, 60, 60, 60, 60];

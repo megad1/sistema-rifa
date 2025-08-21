@@ -81,7 +81,7 @@ export default function WinwheelRoulette({
     '15 MIL REAIS',
     'CARRO 0KM',
     'TENTE OUTRA VEZ', // esquerda
-    '2 iPhone 16 Pro Max',
+    '2 iphones 16 pro max',
   ],
   spins = 7,
   durationSec = 5,
