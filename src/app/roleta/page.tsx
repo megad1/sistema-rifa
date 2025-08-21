@@ -16,6 +16,7 @@ import { limparCpf } from '@/utils/formatters';
 export default function RoletaPage() {
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [hasLoadedBalance, setHasLoadedBalance] = useState<boolean>(false);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [cpfInput, setCpfInput] = useState<string>('');
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
@@ -39,7 +40,7 @@ export default function RoletaPage() {
       if (!resp.ok) { setBalance(0); return; }
       const data = await resp.json();
       setBalance(Number(data?.balance ?? 0));
-    } catch { setBalance(0); } finally { setLoading(false); }
+    } catch { setBalance(0); } finally { setLoading(false); setHasLoadedBalance(true); }
   }, []);
 
   const handleSpinStart = () => true;
@@ -129,7 +130,7 @@ export default function RoletaPage() {
               onFinished={handleFinished}
               disabled={balance <= 0}
             />
-            {balance <= 0 && (
+            {hasLoadedBalance && balance <= 0 && (
               <div className="mt-3">
                 <Link href="/meus-titulos" className="w-full bg-black text-white font-bold text-sm rounded-lg px-3 py-2 flex items-center justify-center gap-2 border border-black hover:bg-neutral-900 shadow-md">
                   <i className="bi bi-ticket-perforated"></i>
