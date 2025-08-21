@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { limparCpf, limparTelefone } from '@/utils/formatters';
 import { FREIGHT_OPTIONS_BR } from '@/config/payments';
+import { supabaseAdmin } from '@/lib/supabase';
+import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -93,6 +95,55 @@ export async function POST(request: Request) {
     if (!result?.id || !result?.pix?.qrcode) {
       return NextResponse.json({ success: false, message: 'Resposta de pagamento inválida.' }, { status: 502 });
     }
+
+    // Upsert cliente e registrar compra (como nas cotas) — sem títulos
+    const { data: cliente, error: clienteError } = await supabaseAdmin
+      .from('clientes')
+      .upsert({ nome, email, cpf, telefone, updated_at: new Date().toISOString() }, { onConflict: 'cpf' })
+      .select()
+      .single();
+    if (clienteError || !cliente) {
+      return NextResponse.json({ success: false, message: 'Não foi possível salvar o cliente.' }, { status: 500 });
+    }
+
+    const tracking = {
+      kind: 'frete',
+      freightId: freight.id,
+      freightLabel: freight.label,
+      produto: 'Frete prêmio roleta',
+      address: { cep, endereco, numero, complemento, bairro, cidade, estado },
+    } as Record<string, unknown>;
+
+    const { error: compraError } = await supabaseAdmin
+      .from('compras')
+      .insert({
+        cliente_id: cliente.id,
+        transaction_id: result.id,
+        quantidade_bilhetes: 1,
+        valor_total: freight.amount,
+        status: 'pending',
+        tracking_parameters: tracking as unknown as any,
+      });
+    if (compraError) {
+      return NextResponse.json({ success: false, message: 'Não foi possível registrar a compra.' }, { status: 500 });
+    }
+
+    // UTMify (waiting_payment)
+    try {
+      const utm = await getUtmifySettings();
+      if (utm.enabled) {
+        await postUtmifyOrder({
+          orderId: result.id,
+          status: 'waiting_payment',
+          createdAt: toUtcSqlDate(new Date()),
+          approvedDate: null,
+          ip: request.headers.get('x-forwarded-for') ?? undefined,
+          customer: { name: nome, email, document: cpf },
+          quantity: 1,
+          totalValue: freight.amount,
+        });
+      }
+    } catch {}
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(result.pix.qrcode)}&size=300x300`;
 
