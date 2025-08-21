@@ -18,6 +18,8 @@ export default function RoletaPage() {
   const [cpfInput, setCpfInput] = useState<string>('');
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [winLabel, setWinLabel] = useState<string | null>(null);
+  const [showWinModal, setShowWinModal] = useState<boolean>(false);
 
   const fetchBalance = useCallback(async (cpfOptional?: string) => {
     setLoading(true);
@@ -36,7 +38,13 @@ export default function RoletaPage() {
   }, []);
 
   const handleSpinStart = () => true;
-  const handleFinished = () => { fetchBalance(); };
+  const handleFinished = (label?: string) => {
+    fetchBalance();
+    if (label && !/TENTE/i.test(label)) {
+      setWinLabel(label);
+      setShowWinModal(true);
+    }
+  };
 
   // Checa sessão; se não houver, abre modal de CPF; se houver, busca saldo
   useEffect(() => {
@@ -138,6 +146,24 @@ export default function RoletaPage() {
                 <button type="submit" disabled={loginLoading} className="px-3 py-2 rounded-md text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">{loginLoading ? 'Entrando...' : 'Continuar'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showWinModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-5 text-center">
+            <h2 className="text-2xl font-extrabold text-green-600">Parabéns!</h2>
+            <p className="mt-2 text-gray-800 font-semibold">Você ganhou:</p>
+            <p className="mt-1 text-xl font-black text-gray-900">{winLabel}</p>
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={() => setShowWinModal(false)}
+                className="px-4 py-2 rounded-md font-bold text-white bg-green-600 hover:bg-green-700"
+              >
+                Ok
+              </button>
+            </div>
           </div>
         </div>
       )}
