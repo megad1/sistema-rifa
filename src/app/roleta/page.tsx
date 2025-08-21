@@ -52,20 +52,21 @@ export default function RoletaPage() {
     }
   };
 
-  // Checa sessão; se não houver, abre modal de CPF; se houver, busca saldo
+  // Carrega saldo diretamente (uma requisição a menos):
+  // se autorizado, já exibe; se não, abre modal de CPF
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch('/api/client/session', { cache: 'no-store' });
-        const s = await r.json();
-        if (s?.active) {
-          await fetchBalance();
-        } else {
-          setShowLoginModal(true);
+        const resp = await fetch('/api/roulette/balance', { method: 'POST' });
+        if (resp.ok) {
+          const data = await resp.json();
+          setBalance(Number(data?.balance ?? 0));
+          setHasLoadedBalance(true);
+          return;
         }
-      } catch {
-        setShowLoginModal(true);
-      }
+      } catch {}
+      setHasLoadedBalance(true);
+      setShowLoginModal(true);
     })();
   }, [fetchBalance]);
 
