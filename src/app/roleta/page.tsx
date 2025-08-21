@@ -22,7 +22,8 @@ export default function RoletaPage() {
   const [winLabel, setWinLabel] = useState<string | null>(null);
   const [showWinModal, setShowWinModal] = useState<boolean>(false);
   const [showShippingModal, setShowShippingModal] = useState<boolean>(false);
-  // Removido uso direto por enquanto; modal gerencia o estado do PIX
+  const [shippingLoading, setShippingLoading] = useState<boolean>(false);
+  const [shippingInitialData, setShippingInitialData] = useState<{ nome?: string; email?: string; cpf?: string; telefone?: string } | undefined>(undefined);
 
   const fetchBalance = useCallback(async (cpfOptional?: string) => {
     setLoading(true);
@@ -86,37 +87,7 @@ export default function RoletaPage() {
     }
   };
 
-  // Wrapper que faz o prefetch dos dados do cliente antes de abrir o modal
-  function PrefetchedFreightModal({ onClose, prizeLabel }: { onClose: () => void; prizeLabel?: string }) {
-    const [initialData, setInitialData] = useState<{ nome?: string; email?: string; cpf?: string; telefone?: string } | null>(null);
-    useEffect(() => {
-      (async () => {
-        try {
-          const r = await fetch('/api/client/profile', { cache: 'no-store' });
-          const j = await r.json();
-          if (j?.success && j?.cliente) {
-            setInitialData({ nome: j.cliente.nome, email: j.cliente.email, cpf: j.cliente.cpf, telefone: j.cliente.telefone });
-          } else {
-            setInitialData({});
-          }
-        } catch {
-          setInitialData({});
-        }
-      })();
-    }, []);
-
-    if (!initialData) {
-      return (
-        <div className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
-            <p className="text-sm text-gray-700">Carregando seus dados...</p>
-          </div>
-        </div>
-      );
-    }
-
-    return <FreightCheckoutModal onClose={onClose} prizeLabel={prizeLabel} initialData={initialData} />;
-  }
+  // Wrapper removido: prefetch agora acontece antes do modal abrir, sem overlay.
   return (
     <div className="bg-[#ebebeb] min-h-screen">
       {/* GSAP TweenMax v2 (necessária para Winwheel.js clássico) */}
@@ -193,10 +164,36 @@ export default function RoletaPage() {
             <p className="mt-1 text-xl font-black text-gray-900">{winLabel}</p>
             <div className="mt-4 flex justify-center">
               <button
-                onClick={() => { setShowWinModal(false); setShowShippingModal(true); }}
-                className="px-4 py-2 rounded-md font-bold text-white bg-green-600 hover:bg-green-700"
+                onClick={async () => {
+                  if (shippingLoading) return;
+                  setShippingLoading(true);
+                  try {
+                    const r = await fetch('/api/client/profile', { cache: 'no-store' });
+                    const j = await r.json();
+                    if (j?.success && j?.cliente) {
+                      setShippingInitialData({ nome: j.cliente.nome, email: j.cliente.email, cpf: j.cliente.cpf, telefone: j.cliente.telefone });
+                    } else {
+                      setShippingInitialData({});
+                    }
+                  } catch { setShippingInitialData({}); }
+                  finally {
+                    setShippingLoading(false);
+                    setShowWinModal(false);
+                    setShowShippingModal(true);
+                  }
+                }}
+                className="px-4 py-2 rounded-md font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60"
+                disabled={shippingLoading}
               >
-                Continuar para entrega
+                {shippingLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Carregando
+                  </span>
+                ) : 'Continuar para entrega'}
               </button>
             </div>
           </div>
@@ -204,7 +201,7 @@ export default function RoletaPage() {
       )}
 
       {showShippingModal && (
-        <PrefetchedFreightModal onClose={() => setShowShippingModal(false)} prizeLabel={winLabel || undefined} />
+        <FreightCheckoutModal onClose={() => setShowShippingModal(false)} prizeLabel={winLabel || undefined} initialData={shippingInitialData} />
       )}
 
       <Footer />
