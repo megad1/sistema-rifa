@@ -2,55 +2,55 @@
 // Templates HTML inline para emails transacionais do sistema de rifas
 
 interface PurchaseConfirmationData {
-    nomeCliente: string;
-    quantidadeCotas: number;
-    valorTotal: number;
-    bilhetes: string[];
-    dataCompra: string; // ISO string
-    tituloCampanha: string;
-    siteUrl: string; // ex: https://seusite.com
+  nomeCliente: string;
+  quantidadeCotas: number;
+  valorTotal: number;
+  bilhetes: string[];
+  dataCompra: string; // ISO string
+  tituloCampanha: string;
+  siteUrl: string; // ex: https://seusite.com
 }
 
 interface RecoveryEmailData {
-    nomeCliente: string;
-    quantidadeCotas: number;
-    valorTotal: number;
-    tituloCampanha: string;
-    siteUrl: string;
+  nomeCliente: string;
+  quantidadeCotas: number;
+  valorTotal: number;
+  tituloCampanha: string;
+  siteUrl: string;
 }
 
 export function buildPurchaseConfirmationHtml(data: PurchaseConfirmationData): string {
-    const {
-        nomeCliente,
-        quantidadeCotas,
-        valorTotal,
-        bilhetes,
-        dataCompra,
-        tituloCampanha,
-        siteUrl,
-    } = data;
+  const {
+    nomeCliente,
+    quantidadeCotas,
+    valorTotal,
+    bilhetes,
+    dataCompra,
+    tituloCampanha,
+    siteUrl,
+  } = data;
 
-    const dataFormatada = new Date(dataCompra).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+  const dataFormatada = new Date(dataCompra).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
-    const valorFormatado = valorTotal.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-    });
+  const valorFormatado = valorTotal.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 
-    const bilhetesHtml = bilhetes
-        .map(
-            (b) =>
-                `<span style="display:inline-block;background:#EBF5FF;border:1px solid #BFDBFE;color:#1E3A5F;font-family:'Courier New',monospace;font-weight:bold;font-size:14px;padding:4px 10px;border-radius:6px;margin:3px;">${b}</span>`
-        )
-        .join(' ');
+  const bilhetesHtml = bilhetes
+    .map(
+      (b) =>
+        `<span style="display:inline-block;background:#EBF5FF;border:1px solid #BFDBFE;color:#1E3A5F;font-family:'Courier New',monospace;font-weight:bold;font-size:14px;padding:4px 10px;border-radius:6px;margin:3px;">${b}</span>`
+    )
+    .join(' ');
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -73,7 +73,7 @@ export function buildPurchaseConfirmationHtml(data: PurchaseConfirmationData): s
           <!-- Ícone de sucesso -->
           <tr>
             <td style="padding:28px 24px 0;text-align:center;">
-              <div style="width:56px;height:56px;background-color:#DEF7EC;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+              <div style="width:56px;height:56px;background-color:#DEF7EC;border-radius:50%;display:inline-block;line-height:56px;text-align:center;margin-bottom:12px;">
                 <span style="font-size:28px;color:#059669;">✓</span>
               </div>
               <h2 style="margin:0 0 4px;font-size:22px;font-weight:bold;color:#111827;">Pagamento Confirmado!</h2>
@@ -159,16 +159,16 @@ export function buildPurchaseConfirmationHtml(data: PurchaseConfirmationData): s
 }
 
 export function buildRecoveryHtml(data: RecoveryEmailData): string {
-    const { nomeCliente, quantidadeCotas, valorTotal, tituloCampanha, siteUrl } = data;
+  const { nomeCliente, quantidadeCotas, valorTotal, tituloCampanha, siteUrl } = data;
 
-    const valorFormatado = valorTotal.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-    });
+  const valorFormatado = valorTotal.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 
-    const firstName = nomeCliente.split(' ')[0] || nomeCliente;
+  const firstName = nomeCliente.split(' ')[0] || nomeCliente;
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">

@@ -380,7 +380,18 @@ async function sendConfirmationEmail(
   valorTotal: number,
   bilhetes: string[]
 ): Promise<void> {
-  // Buscar dados do cliente
+  // Buscar dados do cliente e verificar se já foi enviado
+  const { data: compraData } = await supabaseAdmin
+    .from('compras')
+    .select('confirmation_email_sent_at, cliente_id')
+    .eq('id', compraId)
+    .single();
+
+  if (compraData?.confirmation_email_sent_at) {
+    console.log('[EMAIL] Confirmação já enviada anteriormente para esta compra, pulando.');
+    return;
+  }
+
   const { data: cliente } = await supabaseAdmin
     .from('clientes')
     .select('nome, email')
