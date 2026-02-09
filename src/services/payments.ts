@@ -1,4 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendEmail } from '@/lib/email';
+import { buildPurchaseConfirmationHtml } from '@/lib/email-templates';
 
 interface CompraInterna {
   id: string;
@@ -124,7 +126,6 @@ export async function processPaymentConfirmation(transactionId: string): Promise
       // Conceder giros pela compra (apenas na primeira confirmação)
       try {
         let spins = 0;
-        // Tenta pegar do tracking salvo (prioridade)
         const track = (compra as unknown as CompraInterna).tracking_parameters;
         if (track && track.spins_to_grant) {
           spins = Number(track.spins_to_grant);
@@ -134,6 +135,13 @@ export async function processPaymentConfirmation(transactionId: string): Promise
         if (spins > 0) await grantSpinsToCliente(String((compra as unknown as CompraInterna).cliente_id), spins);
       } catch (e) {
         console.error('Erro ao conceder giros (polling):', e);
+      }
+
+      // Enviar email de confirmação
+      try {
+        await sendConfirmationEmail(compra.id, String((compra as unknown as CompraInterna).cliente_id), compra.quantidade_bilhetes, compra.valor_total ?? 0, newTitles);
+      } catch (e) {
+        console.error('[EMAIL] Erro ao enviar confirmação (polling):', e);
       }
     } else {
       // Já pago: garantir idempotência
@@ -207,7 +215,11 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
   let compra: {
     id: string;
     quantidade_bilhetes: number;
+    valor_total: number;
     status: 'pending' | 'paid' | string;
+    cliente_id: string | number;
+    tracking_parameters?: Record<string, unknown>;
+    [key: string]: unknown;
   } | null = null;
   let lastError: unknown = null;
   for (const candidate of candidateIds) {
@@ -262,10 +274,8 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
       titles = newTitles;
       updated = true;
 
-      // Conceder giros pela compra (apenas na primeira confirmação via webhook)
       try {
         let spins = 0;
-        // Tenta pegar do tracking salvo (prioridade)
         const track = (compra as unknown as CompraInterna).tracking_parameters;
         if (track && track.spins_to_grant) {
           spins = Number(track.spins_to_grant);
@@ -276,6 +286,13 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
         if (spins > 0) await grantSpinsToCliente(String((compra as unknown as CompraInterna).cliente_id), spins);
       } catch (e) {
         console.error('Erro ao conceder giros (webhook):', e);
+      }
+
+      // Enviar email de confirmação
+      try {
+        await sendConfirmationEmail(compra.id, String((compra as unknown as CompraInterna).cliente_id), compra.quantidade_bilhetes, compra.valor_total ?? 0, newTitles);
+      } catch (e) {
+        console.error('[EMAIL] Erro ao enviar confirmação (webhook):', e);
       }
     } else {
       // Já pago: garantir idempotência
@@ -352,4 +369,60 @@ async function grantSpinsToCliente(clienteId: string, spinsToGrant: number): Pro
   }
 }
 
+// ---- Envio de Email de Confirmação ----
 
+import { getCampaignSettings } from '@/lib/campaign';
+
+async function sendConfirmationEmail(
+  compraId: string,
+  clienteId: string,
+  quantidadeCotas: number,
+  valorTotal: number,
+  bilhetes: string[]
+): Promise<void> {
+  // Buscar dados do cliente
+  const { data: cliente } = await supabaseAdmin
+    .from('clientes')
+    .select('nome, email')
+    .eq('id', clienteId)
+    .single();
+
+  if (!cliente?.email) {
+    console.warn('[EMAIL] Cliente sem email, pulando confirmação.');
+    return;
+  }
+
+  // Buscar nome da campanha
+  const campaign = await getCampaignSettings();
+
+  // URL base do site
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
+  if (!siteUrl) console.warn('[EMAIL] NEXT_PUBLIC_SITE_URL não configurada. Links no email podem não funcionar.');
+
+  const html = buildPurchaseConfirmationHtml({
+    nomeCliente: cliente.nome || 'Cliente',
+    quantidadeCotas,
+    valorTotal,
+    bilhetes,
+    dataCompra: new Date().toISOString(),
+    tituloCampanha: campaign.title,
+    siteUrl,
+  });
+
+  const result = await sendEmail({
+    to: cliente.email,
+    subject: `✅ Compra confirmada — ${quantidadeCotas} cotas`,
+    html,
+  });
+
+  if (result.success) {
+    // Marcar email de confirmação como enviado
+    await supabaseAdmin
+      .from('compras')
+      .update({ confirmation_email_sent_at: new Date().toISOString() })
+      .eq('id', compraId);
+    console.log('[EMAIL] Email de confirmação enviado:', result.id);
+  } else {
+    console.error('[EMAIL] Falha ao enviar confirmação:', result.error);
+  }
+}
