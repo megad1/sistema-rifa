@@ -1,5 +1,7 @@
 import Header from "@/components/Header";
 import PurchaseSection from "@/components/PurchaseSection";
+import WinnersSection from "@/components/WinnersSection";
+import LastWinnersSection from "@/components/LastWinnersSection";
 import { getCampaignSettings } from "@/lib/campaign";
 
 export const runtime = 'edge';
@@ -41,6 +43,12 @@ export default async function Home() {
           defaultQuantity={10}
         />
       </div>
+
+      {/* Seção de Ganhadores - Raspou Achou */}
+      <WinnersSection />
+
+      {/* Seção Últimos Ganhadores - Confira quem mudou de vida */}
+      <LastWinnersSection />
     </div>
   );
 }
