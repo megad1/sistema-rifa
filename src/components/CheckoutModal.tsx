@@ -252,7 +252,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
           ...formData, // envia os dados informados
           amount: totalPrice, // Envia o valor total calculado pelo frontend
           spins: bonusSpins, // Envia os giros calculados
-          trackingParameters: tracking
+          trackingParameters: tracking,
+          campaignTitle: campaignTitle
         }),
       });
       const data = await response.json();

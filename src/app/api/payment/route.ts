@@ -12,11 +12,12 @@ export const runtime = 'edge';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { nome, email, cpf, telefone, quantity, trackingParameters, amount, spins }: {
+        const { nome, email, cpf, telefone, quantity, trackingParameters, amount, spins, campaignTitle }: {
             nome: string; email: string; cpf: string; telefone: string; quantity: number;
             trackingParameters?: Record<string, string | null>;
             amount?: number;
             spins?: number;
+            campaignTitle?: string;
         } = body;
 
         // --- Validação de Entrada ---
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
             },
             "items": [{
                 "id": `PROD_${new Date().getTime()}`,
-                "title": campaign.title,
+                "title": campaignTitle || campaign.title,
                 "quantity": quantity,
                 "unitPrice": Math.round(valor_centavos / quantity),
                 "tangible": false
@@ -121,7 +122,8 @@ export async function POST(request: Request) {
         // --- Registro da Compra no Banco de Dados ---
         const finalTracking = {
             ...(trackingParameters || {}),
-            spins_to_grant: typeof spins === 'number' ? String(spins) : undefined
+            spins_to_grant: typeof spins === 'number' ? String(spins) : undefined,
+            campaign_title: campaignTitle || campaign.title
         };
 
         const { error: compraError } = await supabaseAdmin

@@ -78,11 +78,14 @@ export async function GET(request: Request) {
                     continue;
                 }
 
+                const tracking = compra.tracking_parameters as Record<string, any> | null;
+                const campaign_title = tracking?.campaign_title || campaign.title;
+
                 const html = buildRecoveryHtml({
                     nomeCliente: cliente.nome || 'Cliente',
                     quantidadeCotas: compra.quantidade_bilhetes,
                     valorTotal: compra.valor_total,
-                    tituloCampanha: campaign.title,
+                    tituloCampanha: campaign_title,
                     siteUrl,
                 });
 

@@ -383,7 +383,7 @@ async function sendConfirmationEmail(
   // Buscar dados do cliente e verificar se já foi enviado
   const { data: compraData } = await supabaseAdmin
     .from('compras')
-    .select('confirmation_email_sent_at, cliente_id')
+    .select('confirmation_email_sent_at, cliente_id, tracking_parameters')
     .eq('id', compraId)
     .single();
 
@@ -403,8 +403,10 @@ async function sendConfirmationEmail(
     return;
   }
 
-  // Buscar nome da campanha
+  // Buscar nome da campanha (fallback)
   const campaign = await getCampaignSettings();
+  const tracking = compraData?.tracking_parameters as Record<string, any> | null;
+  const campaign_title = tracking?.campaign_title || campaign.title;
 
   // URL base do site
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
@@ -416,7 +418,7 @@ async function sendConfirmationEmail(
     valorTotal,
     bilhetes,
     dataCompra: new Date().toISOString(),
-    tituloCampanha: campaign.title,
+    tituloCampanha: campaign_title,
     siteUrl,
   });
 
