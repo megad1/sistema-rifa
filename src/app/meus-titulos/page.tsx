@@ -59,7 +59,7 @@ const MeusTitulosPage = () => {
       }
 
       // Vamos garantir que 'bilhetes' seja sempre array
-      const comprasFormatadas = (data.compras || []).map((c: any) => ({
+      const comprasFormatadas = (data.compras || []).map((c: Compra) => ({
         ...c,
         bilhetes: c.bilhetes || []
       }));

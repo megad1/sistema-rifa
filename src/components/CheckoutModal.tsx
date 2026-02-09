@@ -61,7 +61,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
     nome: '', email: '', cpf: '', telefone: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
+
   const [isClientFound, setIsClientFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixData | null>(null);
@@ -294,7 +294,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
       setPaidAt(null);
       setTitles([]);
       setIsClientFound(false);
-      setIsCheckingPhone(false);
+
       setIsCheckingCpf(false);
       setIsEditingData(false);
       // habilita debug por env ou query ?debug=1

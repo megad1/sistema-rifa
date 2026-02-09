@@ -1,5 +1,16 @@
 import { supabaseAdmin } from '@/lib/supabase';
 
+interface CompraInterna {
+  id: string;
+  status: string;
+  quantidade_bilhetes: number;
+  cliente_id: string | number;
+  tracking_parameters?: {
+    spins_to_grant?: string | number;
+    [key: string]: unknown;
+  };
+}
+
 export interface ProcessPaymentResult {
   titles: string[];
   updated: boolean;
@@ -114,13 +125,13 @@ export async function processPaymentConfirmation(transactionId: string): Promise
       try {
         let spins = 0;
         // Tenta pegar do tracking salvo (prioridade)
-        const track = (compra as any).tracking_parameters;
+        const track = (compra as unknown as CompraInterna).tracking_parameters;
         if (track && track.spins_to_grant) {
           spins = Number(track.spins_to_grant);
         } else {
           spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
         }
-        if (spins > 0) await grantSpinsToCliente(String(compra.cliente_id), spins);
+        if (spins > 0) await grantSpinsToCliente(String((compra as unknown as CompraInterna).cliente_id), spins);
       } catch (e) {
         console.error('Erro ao conceder giros (polling):', e);
       }
@@ -255,14 +266,14 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
       try {
         let spins = 0;
         // Tenta pegar do tracking salvo (prioridade)
-        const track = (compra as any).tracking_parameters;
+        const track = (compra as unknown as CompraInterna).tracking_parameters;
         if (track && track.spins_to_grant) {
           spins = Number(track.spins_to_grant);
         } else {
           spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
         }
-        // @ts-expect-error tipo de id depende do schema (uuid/bigint)
-        if (spins > 0) await grantSpinsToCliente(String(compra.cliente_id), spins);
+
+        if (spins > 0) await grantSpinsToCliente(String((compra as unknown as CompraInterna).cliente_id), spins);
       } catch (e) {
         console.error('Erro ao conceder giros (webhook):', e);
       }

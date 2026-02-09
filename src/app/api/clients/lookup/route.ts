@@ -8,7 +8,7 @@ export const runtime = 'edge';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    let { telefone, cpf } = body;
+    const { telefone, cpf } = body;
 
     if (!telefone && !cpf) {
       return NextResponse.json({ success: false, message: 'Telefone ou CPF não fornecido.' }, { status: 400 });
