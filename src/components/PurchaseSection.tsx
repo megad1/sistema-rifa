@@ -231,7 +231,7 @@ const PurchaseSection = ({
                 src={campaignImage}
                 alt={campaignTitle || 'Campanha'}
                 fill
-                className="object-cover mt-6" // mt-6 para compensar o letreiro
+                className="object-cover"
                 priority
                 unoptimized
               />
@@ -403,7 +403,7 @@ const PurchaseSection = ({
                 src="https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482"
                 alt={`${currentDayName} dos Sonhos`}
                 fill
-                className="object-cover mt-6" // mt-6 para compensar o letreiro
+                className="object-cover"
                 unoptimized
                 priority
               />

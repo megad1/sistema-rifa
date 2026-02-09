@@ -12,18 +12,17 @@ export const runtime = 'edge';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { nome, email, cpf, telefone, quantity, trackingParameters, amount }: {
+        const { nome, email, cpf, telefone, quantity, trackingParameters, amount, spins }: {
             nome: string; email: string; cpf: string; telefone: string; quantity: number;
             trackingParameters?: Record<string, string | null>;
             amount?: number;
+            spins?: number;
         } = body;
 
         // --- Validação de Entrada ---
         const campaign = await getCampaignSettings();
         const MIN_QUANTITY = typeof campaign.minQuantity === 'number' ? Math.max(1, Math.floor(campaign.minQuantity)) : 15;
-        // Permitir quantidade menor se for um card especial (assumindo que o frontend valida)
-        // Mas o código original tinha validação rígida. Vou manter a validação de quantidade mínima mas flexibilizar se amount for passado?
-        // O usuário falou "apenas registrar a quantidade de cotas e o valor".
+
         if (!quantity || typeof quantity !== 'number') {
             throw new Error(`Quantidade inválida.`);
         }
@@ -120,6 +119,11 @@ export async function POST(request: Request) {
         }
 
         // --- Registro da Compra no Banco de Dados ---
+        const finalTracking = {
+            ...(trackingParameters || {}),
+            spins_to_grant: typeof spins === 'number' ? String(spins) : undefined
+        };
+
         const { error: compraError } = await supabaseAdmin
             .from('compras')
             .insert({
@@ -128,7 +132,7 @@ export async function POST(request: Request) {
                 quantidade_bilhetes: quantity,
                 valor_total: valor,
                 status: 'pending', // Status inicial
-                tracking_parameters: trackingParameters ?? null
+                tracking_parameters: finalTracking
             });
 
         if (compraError) {

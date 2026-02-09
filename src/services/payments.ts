@@ -112,7 +112,14 @@ export async function processPaymentConfirmation(transactionId: string): Promise
 
       // Conceder giros pela compra (apenas na primeira confirmação)
       try {
-        const spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
+        let spins = 0;
+        // Tenta pegar do tracking salvo (prioridade)
+        const track = (compra as any).tracking_parameters;
+        if (track && track.spins_to_grant) {
+          spins = Number(track.spins_to_grant);
+        } else {
+          spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
+        }
         if (spins > 0) await grantSpinsToCliente(String(compra.cliente_id), spins);
       } catch (e) {
         console.error('Erro ao conceder giros (polling):', e);
@@ -246,7 +253,14 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
 
       // Conceder giros pela compra (apenas na primeira confirmação via webhook)
       try {
-        const spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
+        let spins = 0;
+        // Tenta pegar do tracking salvo (prioridade)
+        const track = (compra as any).tracking_parameters;
+        if (track && track.spins_to_grant) {
+          spins = Number(track.spins_to_grant);
+        } else {
+          spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
+        }
         // @ts-expect-error tipo de id depende do schema (uuid/bigint)
         if (spins > 0) await grantSpinsToCliente(String(compra.cliente_id), spins);
       } catch (e) {
