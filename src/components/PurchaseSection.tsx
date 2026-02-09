@@ -2,35 +2,82 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import CheckoutModal from './CheckoutModal'; // Importando o modal
+import CheckoutModal from './CheckoutModal';
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
-import { getCampaignSettings } from '@/lib/campaign';
+import Image from 'next/image';
 
-type Props = { ticketPrice?: number; drawLabel?: string; campaignTitle?: string; campaignImage?: string; minQuantity?: number; defaultQuantity?: number };
+type Props = {
+  ticketPrice?: number;
+  drawLabel?: string;
+  campaignTitle?: string;
+  campaignImage?: string;
+  minQuantity?: number;
+  defaultQuantity?: number;
+};
 
-const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp, minQuantity: minQuantityProp, defaultQuantity: defaultQuantityProp }: Props) => {
-  const initialMinQty = typeof minQuantityProp === 'number' ? Math.max(1, Math.floor(minQuantityProp)) : 15;
-  const initialDefaultQtyRaw = typeof defaultQuantityProp === 'number' ? Math.max(1, Math.floor(defaultQuantityProp)) : 15;
+const QUANTITY_BUTTONS = [
+  { value: 20, label: '+ 20', popular: false },
+  { value: 10, label: '+ 10', popular: true },
+  { value: 50, label: '+ 50', popular: false },
+];
+
+const PurchaseSection = ({
+  ticketPrice: ticketPriceProp,
+  drawLabel: drawLabelProp,
+  campaignTitle: campaignTitleProp,
+  campaignImage: campaignImageProp,
+  minQuantity: minQuantityProp,
+  defaultQuantity: defaultQuantityProp
+}: Props) => {
+  const initialMinQty = typeof minQuantityProp === 'number' ? Math.max(1, Math.floor(minQuantityProp)) : 5;
+  const initialDefaultQtyRaw = typeof defaultQuantityProp === 'number' ? Math.max(1, Math.floor(defaultQuantityProp)) : 10;
   const initialDefaultQty = Math.max(initialMinQty, initialDefaultQtyRaw);
+
   const [quantity, setQuantity] = useState(initialDefaultQty);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
-  const [ticketPrice, setTicketPrice] = useState<number>(ticketPriceProp ?? 0.11);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ticketPrice, setTicketPrice] = useState<number>(ticketPriceProp ?? 1.99);
   const [drawLabel, setDrawLabel] = useState<string>(drawLabelProp ?? '');
-  const [bannerReady, setBannerReady] = useState(false);
-  const [spins, setSpins] = useState<number>(Math.floor(initialDefaultQty / 5));
-  const [spinsBump, setSpinsBump] = useState(false);
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp ?? '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp ?? '');
   const [minQuantity, setMinQuantity] = useState<number>(initialMinQty);
-  const [defaultQuantity, setDefaultQuantity] = useState<number>(initialDefaultQty);
+  const [countdown, setCountdown] = useState<string>('');
+  const [currentDayName, setCurrentDayName] = useState<string>('');
+  const [nextDayName, setNextDayName] = useState<string>('');
   const MAX_QUANTITY = 200;
+
+  // Nomes dos dias da semana em português
+  const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+  // Contador regressivo até meia-noite + calcular dias
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0); // Meia-noite do próximo dia
+
+      const diff = midnight.getTime() - now.getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+
+      // Formato "Em X horas" como no original
+      setCountdown(`Em ${hours} horas`);
+
+      // Dia atual e próximo dia
+      const currentDay = now.getDay();
+      const nextDay = (currentDay + 1) % 7;
+      setCurrentDayName(diasSemana[currentDay]);
+      setNextDayName(diasSemana[nextDay]);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     setHasMounted(true);
-    setBannerReady(true);
-    // Se não recebemos valores do servidor, faz fallback via API
+
     if (ticketPriceProp === undefined || drawLabelProp === undefined || campaignTitleProp === undefined || campaignImageProp === undefined || minQuantityProp === undefined || defaultQuantityProp === undefined) {
       (async () => {
         try {
@@ -46,8 +93,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
               } else if (mode === 'sameDay' && typeof json.settings.drawDay === 'number') {
                 setDrawLabel(String(json.settings.drawDay).padStart(2, '0') + '/todo mês');
               } else if (mode === 'today') {
-                const now = new Date();
-                setDrawLabel(now.toLocaleDateString('pt-BR'));
+                setDrawLabel(new Date().toLocaleDateString('pt-BR'));
               }
             }
             if (campaignTitleProp === undefined && typeof json.settings.title === 'string') setCampaignTitle(json.settings.title);
@@ -57,30 +103,19 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
               setMinQuantity(mq);
               setQuantity(q => Math.max(mq, q));
             }
-            if (defaultQuantityProp === undefined && typeof json.settings.defaultQuantity === 'number') {
-              const dqRaw = Math.max(1, Math.floor(json.settings.defaultQuantity));
-              const dq = Math.max(minQuantityProp ?? minQuantity, dqRaw);
-              setDefaultQuantity(dq);
-              setQuantity(q => Math.max(dq, q));
-            }
           }
-        } catch {}
+        } catch { }
       })();
     }
   }, []);
 
   useEffect(() => {
-    const price = quantity * ticketPrice;
-    setTotalPrice(price);
-    const nextSpins = Math.floor(quantity / 5);
-    setSpins(prev => {
-      if (prev !== nextSpins) {
-        setSpinsBump(true);
-        window.setTimeout(() => setSpinsBump(false), 350);
-      }
-      return nextSpins;
-    });
+    setTotalPrice(quantity * ticketPrice);
   }, [quantity, ticketPrice]);
+
+  const handleSetQuantity = (amount: number) => {
+    setQuantity(amount);
+  };
 
   const handleAddQuantity = (amount: number) => {
     setQuantity(current => {
@@ -90,131 +125,361 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
       return next;
     });
   };
-  
-  const resetQuantity = () => {
-    setQuantity(minQuantity);
-  }
 
   const handleOpenModal = () => {
     if (quantity <= 0) {
-        alert("Por favor, selecione pelo menos um título para participar.");
-        return;
+      alert("Por favor, selecione pelo menos um título para participar.");
+      return;
     }
     if (totalPrice > MAX_PIX_TOTAL_BR) {
-        const maxPix = MAX_PIX_TOTAL_BR.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        alert(`Valor máximo por Pix é ${maxPix}. Diminua a quantidade ou faça várias compras.`);
-        return;
+      const maxPix = MAX_PIX_TOTAL_BR.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      alert(`Valor máximo por Pix é ${maxPix}. Diminua a quantidade ou faça várias compras.`);
+      return;
     }
     setIsModalOpen(true);
-  }
+  };
 
   return (
     <>
-        <div className="bg-white p-2 rounded-lg shadow-md">
-            <div className="flex justify-center items-center space-x-4 text-xs font-semibold mb-2">
-                <div className="text-center">
-                    <span className="text-gray-600 mr-1">Sorteio</span>
-                    <span className="font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">{drawLabel || 'a definir'}</span>
-                </div>
-                <div className="text-center">
-                    <span className="text-gray-600 mr-1">Por apenas</span>
-                    <span className="font-bold text-white bg-black px-2 py-1 rounded-md">{ticketPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                </div>
-            </div>
-            
-            <div className="text-center bg-gray-100 p-1 rounded-md mb-2">
-                <p className="text-xs text-gray-600 font-semibold">QUANTO MAIS TÍTULOS, MAIS VOCÊ AJUDA E MAIS CHANCES VOCÊ TEM DE GANHAR!</p>
-            </div>
+      {/* Card da Campanha - Estilo PDM Exato */}
+      <div
+        className="bg-white rounded-3xl shadow-lg overflow-hidden"
+        style={{
+          fontFamily: 'Ubuntu, ui-sans-serif, system-ui, sans-serif',
+          padding: '12px'
+        }}
+      >
 
-            {/* Banner Roleta da Sorte com animações */}
-            <div className={`rounded-lg text-white p-2 shadow-md mb-2 animated-gradient`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/25 shadow-sm">
-                    <i className="bi bi-stars text-[18px]"></i>
-                  </span>
-                  <div className="leading-tight">
-                    <p className="text-[12px] font-extrabold uppercase tracking-wide drop-shadow-sm">Roleta da Sorte</p>
-                    <p className="text-[12px] opacity-95">Ganhe 1 giro a cada 5 cotas</p>
-                  </div>
-                </div>
-                <span
-                  className={
-                    `bg-white/25 px-3 py-1.5 rounded-md text-sm font-extrabold transition-transform duration-300 drop-shadow-sm ` +
-                    `${spinsBump ? 'scale-110 ring-2 ring-white/60' : 'scale-100'}`
-                  }
-                >
-                  {spins} giro{spins === 1 ? '' : 's'}
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 mb-2 text-center">
-                {[10, 25, 50, 75, 100, 150].map((num) => {
-                    const isPopular = num === 25;
-                    return (
-                    <div key={num} className="relative h-16">
-                        {isPopular && (
-                        <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-green-700 text-white px-2 py-0 rounded-md whitespace-nowrap" style={{ fontSize: '0.6rem' }}>
-                            Mais popular
-                        </div>
-                        )}
-                        <button
-                        onClick={() => handleAddQuantity(num)}
-                        className={`transition-all text-white flex flex-col justify-center items-center w-full h-full rounded-lg ${isPopular ? 'bg-[#28a745]' : 'bg-black'}`}
-                        >
-                        <p className="font-bold text-xl leading-tight">+{num}</p>
-                        <p className="uppercase" style={{ fontSize: '0.6rem' }}>Selecionar</p>
-                        </button>
-                    </div>
-                    );
-                })}
-            </div>
-                
-            <div className="grid grid-cols-2 gap-2 items-center">
-                {/* Seletor de Quantidade */}
-                <div className="col-span-1 bg-gray-100 rounded-lg p-1 flex items-center h-full">
-                    <div className="flex items-center space-x-2">
-                        <button onClick={resetQuantity} className="text-gray-500 hover:text-black text-lg px-2">
-                            <i className="bi bi-x-circle"></i>
-                        </button>
-                        <button onClick={() => handleAddQuantity(-1)} disabled={quantity <= minQuantity} className="text-gray-500 hover:text-black text-xl px-2 disabled:opacity-40 disabled:cursor-not-allowed">
-                            <i className="bi bi-dash-circle"></i>
-                        </button>
-                    </div>
-                    <input type="text" value={quantity} readOnly className="flex-1 bg-transparent text-black text-center font-bold w-full"/>
-                    <button onClick={() => handleAddQuantity(1)} disabled={quantity >= MAX_QUANTITY} className="text-green-500 hover:text-green-400 text-xl px-2 disabled:opacity-40 disabled:cursor-not-allowed">
-                        <i className="bi bi-plus-circle-fill"></i>
-                    </button>
-                </div>
-                
-                {/* Botão Participar */}
-                <button 
-                    onClick={handleOpenModal}
-                    className="col-span-1 bg-[#28a745] hover:bg-green-700 text-white font-bold p-2 rounded-lg flex items-center justify-center space-x-2 h-full"
-                >
-                    <i className="bi bi-arrow-right-square-fill text-2xl"></i>
-                    <div className="text-left leading-tight">
-                        <span className="text-sm font-semibold">Participar</span>
-                        {hasMounted ? (
-                        <p className="text-xs">{totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                        ) : (
-                        <p className="text-xs">R$ ...</p>
-                        )}
-                    </div>
-                </button>
-            </div>
-
-            
+        {/* Banner da Campanha */}
+        <div className="pb-0">
+          <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden">
+            {campaignImage && (
+              <Image
+                src={campaignImage}
+                alt={campaignTitle || 'Campanha'}
+                fill
+                className="object-cover"
+                priority
+                unoptimized
+              />
+            )}
+          </div>
         </div>
 
-        <CheckoutModal 
-            isOpen={isModalOpen} 
-            onClose={() => setIsModalOpen(false)}
-            quantity={quantity}
-            campaignTitle={campaignTitle}
-            campaignImage={campaignImage}
-        />
+        {/* Processo SUSEP alinhado à direita */}
+        <div className="py-1 text-right">
+          <span className="text-xs text-gray-400">
+            Processo SUSEP: 15414.652557/2025-01
+          </span>
+        </div>
+
+        {/* Contador + Badge OFF + ícone */}
+        <div className="flex items-center justify-between pb-2">
+          {/* Contador à esquerda */}
+          <div className="flex items-center gap-2 text-gray-700">
+            <i className="bi bi-clock text-lg"></i>
+            <span className="font-medium">{countdown || '--:--:--'}</span>
+          </div>
+
+          {/* Badge + ícone à direita */}
+          <div className="flex items-center gap-2">
+            <span
+              className="px-3 rounded-lg"
+              style={{
+                backgroundColor: '#3B82F6',
+                color: 'rgb(255, 255, 255)',
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '1.2px',
+                height: '26px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              60% OFF
+            </span>
+            <button className="w-6 h-6 rounded-full bg-[#212121] flex items-center justify-center text-white text-sm">
+              <i className="bi bi-info"></i>
+            </button>
+          </div>
+        </div>
+
+        {/* Grid de Botões de Quantidade */}
+        <div className="pb-3">
+          <div className="grid grid-cols-3 gap-2">
+            {QUANTITY_BUTTONS.map((btn) => (
+              <button
+                key={btn.value}
+                onClick={() => handleSetQuantity(btn.value)}
+                className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl
+                  bg-gray-100 font-bold text-xl text-gray-700
+                  shadow-sm transition-all duration-200 ease-out
+                  active:scale-95 active:shadow-inner
+                  hover:shadow-md hover:-translate-y-0.5
+                  ${quantity === btn.value ? 'ring-2 ring-orange-400 text-orange-500' : ''}
+                `}
+              >
+                {/* Badge POPULAR acima do +10 */}
+                {btn.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <div
+                      className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap"
+                      style={{ backgroundColor: '#DC2626' }}
+                    >
+                      <i className="bi bi-fire"></i>
+                      <span>POPULAR</span>
+                    </div>
+                  </div>
+                )}
+                <span className="leading-tight">{btn.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Seletor de Quantidade + Botão Comprar */}
+        <div className="pb-0">
+          <div className="flex gap-2 items-stretch">
+
+            {/* Seletor Preto/Amarelo - Estilo PDM Original */}
+            <div className="flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
+              <button
+                onClick={() => handleAddQuantity(-1)}
+                disabled={quantity <= minQuantity}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-opacity disabled:opacity-50"
+                style={{ backgroundColor: 'rgb(245, 166, 35)' }}
+              >
+                −
+              </button>
+              <strong className="min-w-[3rem] text-center text-white text-2xl font-bold mx-2">
+                {quantity}
+              </strong>
+              <button
+                onClick={() => handleAddQuantity(1)}
+                disabled={quantity >= MAX_QUANTITY}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-opacity disabled:opacity-50"
+                style={{ backgroundColor: 'rgb(245, 166, 35)' }}
+              >
+                +
+              </button>
+            </div>
+
+            {/* Botão Comprar */}
+            <button
+              onClick={handleOpenModal}
+              className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-0 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+            >
+              <div className="flex flex-col items-start justify-center h-full gap-0.5">
+                <span className="text-sm leading-none">Comprar</span>
+                {hasMounted ? (
+                  <span className="leading-none font-bold">
+                    {totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
+                ) : (
+                  <span className="leading-none font-bold">R$ ...</span>
+                )}
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ======== SEGUNDO CARD - Dia Atual dos Sonhos ======== */}
+      <div className="mt-6">
+        {/* Título com estrela */}
+        <div className="flex items-start gap-3 mb-4">
+          <span className="text-3xl">⭐</span>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">{currentDayName || 'Hoje'} dos Sonhos</h2>
+            <p className="text-sm text-gray-500">Sua semana começa com R$ 100 mil esperando por você 🤩</p>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div
+          className="bg-white rounded-3xl shadow-lg overflow-hidden"
+          style={{
+            fontFamily: 'Ubuntu, ui-sans-serif, system-ui, sans-serif',
+            padding: '12px'
+          }}
+        >
+          {/* Banner */}
+          <div className="pb-0">
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+              <span className="text-white text-2xl font-bold">{currentDayName?.toUpperCase() || 'HOJE'} DOS SONHOS</span>
+            </div>
+          </div>
+
+          {/* Processo SUSEP */}
+          <div className="py-1 text-right">
+            <span className="text-xs text-gray-400">
+              Processo SUSEP: 15414.652557/2025-01
+            </span>
+          </div>
+
+          {/* Contador + Badge */}
+          <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center gap-2 text-gray-700">
+              <i className="bi bi-clock text-lg"></i>
+              <span className="font-medium">{countdown || '--:--:--'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="px-3 rounded-lg"
+                style={{
+                  backgroundColor: '#22C55E',
+                  color: 'rgb(255, 255, 255)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '1.2px',
+                  height: '26px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                49% OFF
+              </span>
+              <button className="w-6 h-6 rounded-full bg-[#212121] flex items-center justify-center text-white text-sm">
+                <i className="bi bi-info"></i>
+              </button>
+            </div>
+          </div>
+
+          {/* Botões +40, +50, +200 */}
+          <div className="pb-3">
+            <div className="grid grid-cols-3 gap-2">
+              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+                <span className="leading-tight">+ 40</span>
+              </button>
+              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500">
+                {/* Badge POPULAR */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                  <div className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
+                    <i className="bi bi-fire"></i>
+                    <span>POPULAR</span>
+                  </div>
+                </div>
+                <span className="leading-tight">+ 50</span>
+              </button>
+              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+                <span className="leading-tight">+ 200</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Seletor + Comprar */}
+          <div className="pb-0">
+            <div className="flex gap-2 items-stretch">
+              <div className="flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
+                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>−</button>
+                <strong className="min-w-[3rem] text-center text-white text-2xl font-bold mx-2">40</strong>
+                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>+</button>
+              </div>
+              <button className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg">
+                <div className="flex flex-col items-start justify-center h-full gap-0.5">
+                  <span className="text-sm leading-none">Comprar</span>
+                  <span className="leading-none font-bold">R$ 9,99</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ======== TERCEIRO CARD - Próximo Dia Premiado ======== */}
+      <div className="mt-6">
+        {/* Título com emoji */}
+        <div className="flex items-start gap-3 mb-4">
+          <span className="text-3xl">🏆</span>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">{nextDayName || 'Amanhã'} Premiada</h2>
+            <p className="text-sm text-gray-500">Toda {nextDayName?.toLowerCase() || 'amanhã'} R$ 40 mil para transformar sua semana 🍀</p>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div
+          className="bg-white rounded-3xl shadow-lg overflow-hidden"
+          style={{
+            fontFamily: 'Ubuntu, ui-sans-serif, system-ui, sans-serif',
+            padding: '12px'
+          }}
+        >
+          {/* Banner */}
+          <div className="pb-0">
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center">
+              <span className="text-white text-2xl font-bold">{nextDayName?.toUpperCase() || 'AMANHÃ'} PREMIADA - R$ 40 MIL</span>
+            </div>
+          </div>
+
+          {/* Processo SUSEP */}
+          <div className="py-1 text-right">
+            <span className="text-xs text-gray-400">
+              Processo SUSEP: 15414.669933/2025-98
+            </span>
+          </div>
+
+          {/* Contador + Badge */}
+          <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center gap-2 text-gray-700">
+              <i className="bi bi-calendar3 text-lg"></i>
+              <span className="font-medium">Em 1 dia</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center text-white text-sm">
+                <i className="bi bi-info"></i>
+              </button>
+            </div>
+          </div>
+
+          {/* Botões +10, +50, +100 */}
+          <div className="pb-3">
+            <div className="grid grid-cols-3 gap-2">
+              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+                <span className="leading-tight">+ 10</span>
+              </button>
+              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500">
+                {/* Badge POPULAR */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                  <div className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
+                    <i className="bi bi-fire"></i>
+                    <span>POPULAR</span>
+                  </div>
+                </div>
+                <span className="leading-tight">+ 50</span>
+              </button>
+              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+                <span className="leading-tight">+ 100</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Seletor + Comprar */}
+          <div className="pb-0">
+            <div className="flex gap-2 items-stretch">
+              <div className="flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
+                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>−</button>
+                <strong className="min-w-[3rem] text-center text-white text-2xl font-bold mx-2">50</strong>
+                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>+</button>
+              </div>
+              <button className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg">
+                <div className="flex flex-col items-start justify-center h-full gap-0.5">
+                  <span className="text-sm leading-none">Comprar</span>
+                  <span className="leading-none font-bold">R$ 9,99</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <CheckoutModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        quantity={quantity}
+        campaignTitle={campaignTitle}
+        campaignImage={campaignImage}
+      />
     </>
   );
 };

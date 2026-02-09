@@ -56,9 +56,17 @@ body.modal-open {
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .pulse-badge {
@@ -66,8 +74,17 @@ body.modal-open {
 }
 
 @keyframes pulseGlow {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.45); }
-  50% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.45);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
 }
 
 :root {
@@ -78,18 +95,21 @@ body.modal-open {
   --card-foreground: 224 71.4% 4.1%;
   --popover: 0 0% 100%;
   --popover-foreground: 224 71.4% 4.1%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 20% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
+  --primary: 142 72% 29%;
+  /* Verde escuro #166534 - Header PDM */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 33 100% 50%;
+  /* Laranja #FF9000 - Seletor quantidade */
+  --secondary-foreground: 0 0% 100%;
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --accent: 48 96% 53%;
+  /* Amarelo #F5C518 - Badge Popular */
+  --accent-foreground: 0 0% 0%;
   --destructive: 0 84.2% 60.2%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  --ring: 142 72% 29%;
   --chart-1: 12 76% 61%;
   --chart-2: 173 58% 39%;
   --chart-3: 197 37% 24%;
@@ -97,12 +117,28 @@ body.modal-open {
   --chart-5: 27 87% 67%;
   --sidebar: 0 0% 98%;
   --sidebar-foreground: 240 5.3% 26.1%;
-  --sidebar-primary: 221.2 83.2% 53.3%;
-  --sidebar-primary-foreground: 210 20% 98%;
+  --sidebar-primary: 142 72% 29%;
+  --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 210 40% 96.1%;
   --sidebar-accent-foreground: 222.2 47.4% 11.2%;
   --sidebar-border: 214.3 31.8% 91.4%;
-  --sidebar-ring: 221.2 83.2% 53.3%;
+  --sidebar-ring: 142 72% 29%;
+
+  /* Pix do Milhão Design System */
+  --pdm-green: 142 72% 29%;
+  /* #166534 */
+  --pdm-green-light: 142 76% 36%;
+  /* #16a34a */
+  --pdm-orange: 33 100% 50%;
+  /* #FF9000 */
+  --pdm-orange-dark: 25 95% 53%;
+  /* #F97316 */
+  --pdm-yellow: 48 96% 53%;
+  /* #F5C518 */
+  --pdm-pink: 330 81% 60%;
+  /* #EC4899 - Banner background */
+  --pdm-cyan: 187 92% 69%;
+  /* #67E8F9 - Accents */
 }
 
 .dark {
@@ -143,6 +179,7 @@ body.modal-open {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     /* Garante que aplicamos as tokens corretamente */
     background: hsl(var(--background));
@@ -151,5 +188,104 @@ body.modal-open {
 }
 
 /* Utilitário para esconder a barra de rolagem de containers horizontais */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ========================================
+   Pix do Milhão - Design System Classes
+   ======================================== */
+
+/* Botão de quantidade estilo PDM */
+.btn-pdm-qty {
+  @apply relative flex flex-col items-center justify-center px-4 py-3 rounded-2xl;
+  @apply bg-gray-100 text-gray-600 font-bold;
+  @apply shadow-sm transition-all duration-200 ease-out;
+  @apply active:scale-95 active:shadow-inner;
+  @apply hover:shadow-md hover:-translate-y-0.5;
+}
+
+.btn-pdm-qty-highlight {
+  @apply border-2 border-yellow-400;
+}
+
+/* Badge "Popular" animado */
+.badge-popular {
+  @apply absolute -top-2.5 left-1/2 -translate-x-1/2 z-10;
+  @apply flex items-center gap-1 px-2 py-0.5;
+  @apply text-[10px] font-bold uppercase text-black;
+  @apply bg-gradient-to-r from-yellow-400 to-amber-500;
+  @apply rounded-full shadow-md;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+/* Seletor de quantidade estilo PDM (laranja) */
+.qty-selector-pdm {
+  @apply flex items-center justify-between;
+  @apply bg-gradient-to-r from-orange-400 to-orange-500;
+  @apply rounded-full px-1 py-1;
+  @apply shadow-lg;
+}
+
+.qty-selector-btn {
+  @apply w-10 h-10 rounded-full;
+  @apply flex items-center justify-center;
+  @apply bg-white/20 hover:bg-white/30;
+  @apply text-white text-2xl font-bold;
+  @apply transition-all duration-150;
+  @apply disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+.qty-selector-value {
+  @apply w-16 text-center;
+  @apply text-white text-2xl font-extrabold;
+  @apply bg-transparent;
+}
+
+/* Botão Comprar estilo PDM */
+.btn-pdm-buy {
+  @apply flex items-center justify-center gap-2;
+  @apply bg-gradient-to-br from-green-600 to-green-700;
+  @apply text-white font-bold;
+  @apply px-6 py-3 rounded-xl;
+  @apply shadow-lg hover:shadow-xl;
+  @apply transition-all duration-200 ease-out;
+  @apply hover:-translate-y-0.5;
+  @apply active:translate-y-0 active:shadow-md;
+}
+
+/* Animação pulsante para botões de comprar */
+.pulse-buy {
+  animation: pulseBuy 2s ease-in-out infinite;
+}
+
+@keyframes pulseBuy {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+  }
+
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.6);
+  }
+}
