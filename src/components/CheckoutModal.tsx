@@ -78,6 +78,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
   const campaignTitle = campaignTitleProp || '';
   const campaignImage = campaignImageProp || '';
 
+  const [isCopied, setIsCopied] = useState(false);
   const [isEditingData, setIsEditingData] = useState(false);
 
   // Calcula giros de bônus: usa a prop se definida, senão fallback para regra antiga
@@ -277,7 +278,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
 
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
-    alert('Código PIX copiado para a área de transferência!');
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   }, []);
 
   // --- Efeitos (useEffect) ---
@@ -519,9 +521,12 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
                   </div>
                   <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
                     <span className="text-xs font-mono text-green-700 truncate mr-2">{pixData!.pixCopiaECola}</span>
-                    <button onClick={() => copyToClipboard(pixData!.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
-                      <i className="bi bi-clipboard-check"></i>
-                      <span>Copiar</span>
+                    <button
+                      onClick={() => copyToClipboard(pixData!.pixCopiaECola)}
+                      className={`${isCopied ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'} px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-all flex items-center space-x-1 shrink-0`}
+                    >
+                      <i className={`bi ${isCopied ? 'bi-check-all' : 'bi-clipboard-check'}`}></i>
+                      <span>{isCopied ? 'Copiado!' : 'Copiar'}</span>
                     </button>
                   </div>
                 </div>

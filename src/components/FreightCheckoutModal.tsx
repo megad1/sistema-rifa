@@ -281,6 +281,7 @@ function PixLikeCheckout({ pix, onClose }: { pix: PixData; onClose: () => void }
   const [timeLeft, setTimeLeft] = useState(600);
   const [checking, setChecking] = useState(false);
   const [status, setStatus] = useState<'pending' | 'paid' | 'expired'>('pending');
+  const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (timeLeft <= 0) return; const t = setInterval(() => setTimeLeft((s) => s - 1), 1000); return () => clearInterval(t);
   }, [timeLeft]);
@@ -293,6 +294,11 @@ function PixLikeCheckout({ pix, onClose }: { pix: PixData; onClose: () => void }
       const j = await r.json();
       if (j?.success && j?.status === 'paid') setStatus('paid');
     } finally { setChecking(false); }
+  };
+  const handleCopy = () => {
+    navigator.clipboard.writeText(pix.pixCopiaECola);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
   return (
     <div className="space-y-3">
@@ -318,9 +324,13 @@ function PixLikeCheckout({ pix, onClose }: { pix: PixData; onClose: () => void }
         </div>
         <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
           <span className="text-xs font-mono text-green-700 truncate mr-2">{pix.pixCopiaECola}</span>
-          <button type="button" onClick={() => navigator.clipboard.writeText(pix.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
-            <i className="bi bi-clipboard-check"></i>
-            <span>Copiar</span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className={`${copied ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'} px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-all flex items-center space-x-1 shrink-0`}
+          >
+            <i className={`bi ${copied ? 'bi-check-all' : 'bi-clipboard-check'}`}></i>
+            <span>{copied ? 'Copiado!' : 'Copiar'}</span>
           </button>
         </div>
       </div>
