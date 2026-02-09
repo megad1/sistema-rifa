@@ -7,6 +7,8 @@ import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 import { getCampaignSettings } from '@/lib/campaign';
 import { buildLoginCookie } from '@/lib/clientAuth';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -177,4 +179,3 @@ export async function POST(request: Request) {
         });
     }
 }
-

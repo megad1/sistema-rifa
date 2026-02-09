@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { limparTelefone } from '@/utils/formatters';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -39,9 +41,8 @@ export async function POST(request: Request) {
     console.error("Erro na API de busca de cliente:", err);
     let errorMessage = "Ocorreu um erro desconhecido.";
     if (err instanceof Error) {
-        errorMessage = err.message;
+      errorMessage = err.message;
     }
     return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
-

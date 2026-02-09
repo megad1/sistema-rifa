@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -20,8 +22,8 @@ export async function POST(request: Request) {
 
     if (clienteError || !cliente) {
       if (clienteError && clienteError.code !== 'PGRST116') { // Ignora erro de 'não encontrado'
-          console.error('Erro ao buscar cliente:', clienteError);
-          throw new Error('Erro ao consultar dados do cliente.');
+        console.error('Erro ao buscar cliente:', clienteError);
+        throw new Error('Erro ao consultar dados do cliente.');
       }
       // Se não encontrou o cliente, retorna uma lista vazia, o que não é um erro.
       return NextResponse.json({ success: true, compras: [] });
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     if (!compras || compras.length === 0) {
-        return NextResponse.json({ success: true, compras: [] });
+      return NextResponse.json({ success: true, compras: [] });
     }
 
     // 3. Para cada compra, buscar os bilhetes associados
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
           // Retorna a compra mesmo que os bilhetes falhem, para não quebrar a UI
           return { ...compra, bilhetes: [] };
         }
-        
+
         return { ...compra, bilhetes: bilhetes || [] };
       })
     );
@@ -72,9 +74,8 @@ export async function POST(request: Request) {
     console.error("Erro na API de busca de bilhetes:", err);
     let errorMessage = "Ocorreu um erro desconhecido.";
     if (err instanceof Error) {
-        errorMessage = err.message;
+      errorMessage = err.message;
     }
     return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
-

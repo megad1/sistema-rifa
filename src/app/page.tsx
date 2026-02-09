@@ -8,6 +8,7 @@ import Regulation from "@/components/Regulation";
 import Footer from "@/components/Footer";
 import { getCampaignSettings } from "@/lib/campaign";
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -24,12 +25,12 @@ export default async function Home() {
     } else if (settings.drawMode === 'today') {
       drawLabel = new Date().toLocaleDateString('pt-BR');
     }
-  } catch {}
+  } catch { }
 
   return (
-    <div className="bg-[#ebebeb]"> 
+    <div className="bg-[#ebebeb]">
       <Header logoMode={settings.logoMode} logoText={settings.logoText} logoImageUrl={settings.logoImageUrl} />
-      
+
       {/* Container para Banner */}
       <div className="relative">
         <div className="w-full h-[220px] sm:h-[300px] md:h-[360px] bg-black">
@@ -48,10 +49,10 @@ export default async function Home() {
         </div>
         {/* Texto da campanha sobreposto */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-            <Campaign title={settings.title} subtitle={settings.subtitle} />
+          <Campaign title={settings.title} subtitle={settings.subtitle} />
         </div>
       </div>
-      
+
       {/* Container principal de conteúdo */}
       <div className="container mx-auto max-w-lg px-4 mt-2 space-y-2">
         <MyTicketsBar />
@@ -59,7 +60,7 @@ export default async function Home() {
         <Regulation />
         <Prizes />
       </div>
-      
+
       <Footer />
     </div>
   );
