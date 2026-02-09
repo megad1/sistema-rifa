@@ -269,7 +269,7 @@ const PurchaseSection = ({
                 alignItems: 'center'
               }}
             >
-              60% OFF
+              59% OFF
             </span>
             <button className="w-6 h-6 rounded-full bg-[#212121] flex items-center justify-center text-white text-sm">
               <i className="bi bi-info"></i>
