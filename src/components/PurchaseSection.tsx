@@ -333,7 +333,7 @@ const PurchaseSection = ({
               <span
                 className="px-3 rounded-lg"
                 style={{
-                  backgroundColor: '#212121',
+                  backgroundColor: '#3B82F6',
                   color: 'rgb(255, 255, 255)',
                   fontSize: '12px',
                   fontWeight: 700,
@@ -343,9 +343,9 @@ const PurchaseSection = ({
                   alignItems: 'center'
                 }}
               >
-                60% OFF
+                49% OFF
               </span>
-              <button className="w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center text-white text-sm">
+              <button className="w-6 h-6 rounded-full bg-[#212121] flex items-center justify-center text-white text-sm">
                 <i className="bi bi-info"></i>
               </button>
             </div>
@@ -438,22 +438,7 @@ const PurchaseSection = ({
               <span className="font-medium">Em 1 dia</span>
             </div>
             <div className="flex items-center gap-2">
-              <span
-                className="px-3 rounded-lg"
-                style={{
-                  backgroundColor: '#212121',
-                  color: 'rgb(255, 255, 255)',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  letterSpacing: '1.2px',
-                  height: '26px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                60% OFF
-              </span>
-              <button className="w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center text-white text-sm">
+              <button className="w-6 h-6 rounded-full bg-[#212121] flex items-center justify-center text-white text-sm">
                 <i className="bi bi-info"></i>
               </button>
             </div>
