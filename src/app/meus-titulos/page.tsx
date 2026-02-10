@@ -61,6 +61,7 @@ const MeusTitulosPage = () => {
   const [timeLeft, setTimeLeft] = useState(600);
   const [taxPaymentStatus, setTaxPaymentStatus] = useState<'pending' | 'paid'>('pending');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [redeemedTickets, setRedeemedTickets] = useState<string[]>([]);
 
   const checkStatusRef = useRef<((silent: boolean) => Promise<void>) | null>(null);
 
@@ -173,6 +174,9 @@ const MeusTitulosPage = () => {
         setTimeout(() => {
           setTaxPaymentStatus('paid');
           setTaxStep('processing');
+          if (selectedBilhete) {
+            setRedeemedTickets(prev => [...prev, selectedBilhete.numero]);
+          }
           fireConfettiBurst();
         }, 5000);
 
@@ -235,6 +239,9 @@ const MeusTitulosPage = () => {
         setTaxPaymentStatus('paid');
         setTaxStep('processing');
         setTaxError(null);
+        if (selectedBilhete) {
+          setRedeemedTickets(prev => [...prev, selectedBilhete.numero]);
+        }
       } else if (!silent) {
         setTaxError('O pagamento ainda está pendente. Tente novamente em alguns instantes.');
       }
@@ -274,6 +281,9 @@ const MeusTitulosPage = () => {
     es.addEventListener('paid', () => {
       setTaxPaymentStatus('paid');
       setTaxStep('processing');
+      if (selectedBilhete) {
+        setRedeemedTickets(prev => [...prev, selectedBilhete.numero]);
+      }
       es.close();
     });
     es.addEventListener('timeout', () => es.close());
@@ -419,20 +429,31 @@ const MeusTitulosPage = () => {
                   <div className="flex flex-wrap gap-1.5">
                     {compra.bilhetes.map((bilhete) => (
                       bilhete.premiada ? (
-                        <button
-                          key={bilhete.numero}
-                          onClick={() => handleBilheteClick(bilhete)}
-                          className="relative bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 text-amber-900 font-mono font-bold text-sm px-2.5 py-1.5 rounded-lg shadow-md flex-grow-0 border-2 border-yellow-500 cursor-pointer hover:scale-105 transition-transform active:scale-95"
-                          style={{
-                            animation: 'premiadaPulse 2s ease-in-out infinite',
-                            boxShadow: '0 0 12px rgba(245, 158, 11, 0.5)',
-                          }}
-                        >
-                          <span className="relative z-10 flex items-center gap-1">
-                            <i className="bi bi-trophy-fill text-amber-700 text-xs"></i>
+                        redeemedTickets.includes(bilhete.numero) ? (
+                          <span
+                            key={bilhete.numero}
+                            className="bg-green-100 border border-green-200 text-green-800 font-mono font-bold text-sm px-2.5 py-1.5 rounded-lg shadow-sm flex-grow-0 flex items-center gap-1 opacity-80"
+                          >
+                            <i className="bi bi-check-circle-fill text-green-600 text-xs"></i>
                             {bilhete.numero}
+                            <span className="text-[10px] uppercase font-bold tracking-wider ml-1">Resgatado</span>
                           </span>
-                        </button>
+                        ) : (
+                          <button
+                            key={bilhete.numero}
+                            onClick={() => handleBilheteClick(bilhete)}
+                            className="relative bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 text-amber-900 font-mono font-bold text-sm px-2.5 py-1.5 rounded-lg shadow-md flex-grow-0 border-2 border-yellow-500 cursor-pointer hover:scale-105 transition-transform active:scale-95"
+                            style={{
+                              animation: 'premiadaPulse 2s ease-in-out infinite',
+                              boxShadow: '0 0 12px rgba(245, 158, 11, 0.5)',
+                            }}
+                          >
+                            <span className="relative z-10 flex items-center gap-1">
+                              <i className="bi bi-trophy-fill text-amber-700 text-xs"></i>
+                              {bilhete.numero}
+                            </span>
+                          </button>
+                        )
                       ) : (
                         <span key={bilhete.numero} className="bg-white border border-blue-100 text-blue-900 font-mono font-bold text-sm px-2.5 py-1.5 rounded-lg shadow-sm flex-grow-0">
                           {bilhete.numero}
@@ -454,6 +475,7 @@ const MeusTitulosPage = () => {
                 {compra.status === 'paid' && compra.bilhetes.some(b => b.premiada) && (() => {
                   const bilhetePremiado = compra.bilhetes.find(b => b.premiada);
                   if (!bilhetePremiado) return null;
+                  if (redeemedTickets.includes(bilhetePremiado.numero)) return null;
                   return (
                     <div className="mt-3 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-3 shadow-sm" style={{ animation: 'premiadaPulse 3s ease-in-out infinite' }}>
                       <div className="flex items-center gap-3">
