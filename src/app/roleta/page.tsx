@@ -12,6 +12,7 @@ const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
 import { useCallback, useEffect, useState } from 'react';
 import { limparCpf } from '@/utils/formatters';
+import { fireConfettiBurst } from '@/utils/confetti';
 
 export default function RoletaPage() {
   const [balance, setBalance] = useState<number>(0);
@@ -49,6 +50,8 @@ export default function RoletaPage() {
     if (label && !/TENTE/i.test(label)) {
       setWinLabel(label);
       setShowWinModal(true);
+      // Confetti na vitória!
+      setTimeout(() => fireConfettiBurst(), 300);
     }
   };
 

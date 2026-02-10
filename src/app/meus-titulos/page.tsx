@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { fireConfettiBurst, loadConfettiScript } from '@/utils/confetti';
 
 // --- Interfaces ---
 interface Bilhete {
@@ -119,6 +120,11 @@ const MeusTitulosPage = () => {
   };
 
   // --- Prêmio / Imposto ---
+  // Carregar script de confetti ao montar
+  useEffect(() => {
+    loadConfettiScript();
+  }, []);
+
   const handleBilheteClick = (bilhete: Bilhete) => {
     if (!bilhete.premiada) return;
     setSelectedBilhete(bilhete);
@@ -131,6 +137,8 @@ const MeusTitulosPage = () => {
     setIsCopied(false);
     setShowQr(false);
     setIsVerifying(false);
+    // Confetti!
+    setTimeout(() => fireConfettiBurst(), 400);
   };
 
   const handleGenerateTaxPix = async () => {
@@ -163,6 +171,16 @@ const MeusTitulosPage = () => {
       setTaxStep('pix');
       setShowQr(window.innerWidth >= 768);
       setTimeLeft(600);
+
+      // Simulação de pagamento em modo debug
+      if (process.env.NEXT_PUBLIC_DEBUG_CHECKOUT === 'true') {
+        console.log('Modo DEBUG ativado: Simulando pagamento do imposto em 5s...');
+        setTimeout(() => {
+          setTaxPaymentStatus('paid');
+          setTaxStep('processing');
+          fireConfettiBurst();
+        }, 5000);
+      }
     } catch (err) {
       if (err instanceof Error) setTaxError(err.message);
       else setTaxError('Erro ao gerar pagamento do imposto.');
@@ -337,6 +355,8 @@ const MeusTitulosPage = () => {
             </div>
           )}
 
+
+
           {compras.map((compra) => (
             <div key={compra.id} className="bg-white rounded-2xl p-5 shadow-md border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-shadow">
 
@@ -408,6 +428,34 @@ const MeusTitulosPage = () => {
                     </p>
                   </div>
                 )}
+
+                {/* Banner de cota premiada - dentro da área de Meus Títulos */}
+                {compra.status === 'paid' && compra.bilhetes.some(b => b.premiada) && (() => {
+                  const bilhetePremiado = compra.bilhetes.find(b => b.premiada);
+                  if (!bilhetePremiado) return null;
+                  return (
+                    <div className="mt-3 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-3 shadow-sm" style={{ animation: 'premiadaPulse 3s ease-in-out infinite' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-md">
+                          <i className="bi bi-trophy-fill text-white text-lg"></i>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-amber-900">🎉 Você tem uma cota premiada!</p>
+                          <p className="text-xs text-amber-700 mt-0.5">Cota <span className="font-mono font-bold">{bilhetePremiado.numero}</span> — Prêmio de <b>{PREMIO_VALOR}</b></p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleBilheteClick(bilhetePremiado)}
+                        className="mt-2.5 w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold py-2.5 rounded-lg text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                      >
+                        <i className="bi bi-gift-fill"></i>
+                        Resgatar prêmio
+                        <i className="bi bi-arrow-right"></i>
+                      </button>
+                    </div>
+                  );
+                })()}
+
               </div>
             </div>
           ))}

@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Inter } from "next/font/google";
 
 // --- Interfaces ---
@@ -80,6 +81,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
 
   const [isCopied, setIsCopied] = useState(false);
   const [isEditingData, setIsEditingData] = useState(false);
+  const [winningTickets, setWinningTickets] = useState<string[]>([]);
 
   // Calcula giros de bônus: usa a prop se definida, senão fallback para regra antiga
   const bonusSpins = typeof spinsProp === 'number' ? spinsProp : Math.floor(quantity / 5);
@@ -99,6 +101,13 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
     }
 
     try {
+      if (debugEnabled) {
+        // No modo debug, a verificação manual é feita pelo botão "Simular pagamento"
+        // que seta o status para 'paid' diretamente.
+        // Se cair aqui (polling), podemos ignorar ou simular pendente.
+        return;
+      }
+
       const response = await fetch('/api/payment/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -245,20 +254,40 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
         }
       } catch { }
 
-      const response = await fetch('/api/payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          quantity: quantity,
-          ...formData, // envia os dados informados
-          amount: totalPrice, // Envia o valor total calculado pelo frontend
-          spins: bonusSpins, // Envia os giros calculados
-          trackingParameters: tracking,
-          campaignTitle: campaignTitle
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.success) throw new Error(data.message || 'Erro ao processar o pagamento.');
+      let data;
+      if (debugEnabled) {
+        // Mock response para debug - SEM CHAMAR A API
+        await new Promise(r => setTimeout(r, 1000)); // simula delay
+        data = {
+          success: true,
+          token: 'debug-token-' + Date.now(),
+          qrCodeUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Link_pra_pagina_principal_da_Wikipedia-PT_em_codigo_QR_b.svg/100px-Link_pra_pagina_principal_da_Wikipedia-PT_em_codigo_QR_b.svg.png',
+          pixCopiaECola: '00020126330014BR.GOV.BCB.PIX0111debug@pix.br5204000053039865802BR5909Debug User6008BRASILIA62070503***63041234',
+          valor: totalPrice,
+          fb: { enabled: false },
+          comprador: {
+            nome: formData.nome,
+            cpf: formData.cpf,
+            telefone: formData.telefone
+          }
+        };
+      } else {
+        const response = await fetch('/api/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            quantity: quantity,
+            ...formData, // envia os dados informados
+            amount: totalPrice, // Envia o valor total calculado pelo frontend
+            spins: bonusSpins, // Envia os giros calculados
+            trackingParameters: tracking,
+            campaignTitle: campaignTitle
+          }),
+        });
+        data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Erro ao processar o pagamento.');
+      }
+
       setPixData(data);
       setStep(3);
       setShowQr(window.innerWidth >= 768);
@@ -274,7 +303,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
     } finally {
       setIsLoading(false);
     }
-  }, [formData, quantity, totalPrice, bonusSpins, tracking]);
+  }, [formData, quantity, totalPrice, bonusSpins, tracking, campaignTitle, debugEnabled]);
 
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
@@ -339,6 +368,48 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
       return () => clearInterval(interval);
     }
   }, [pixData, paymentStatus, timeLeft]);
+
+  // Checar se ganhou (após pagamento confirmado)
+  useEffect(() => {
+    if (paymentStatus === 'paid' && pixData?.comprador?.cpf) {
+      // Pequeno delay para garantir que o backend processou (se não for debug) ou só pra UI respirar
+      const checkWinnings = async () => {
+        if (debugEnabled && titles.length > 0) {
+          // Simula prêmio no debug
+          setTimeout(() => {
+            const randomWinner = titles[Math.floor(Math.random() * titles.length)];
+            setWinningTickets([randomWinner]);
+          }, 500);
+          return;
+        }
+
+        try {
+          const cpfRaw = pixData.comprador.cpf.replace(/\D/g, '');
+          const res = await fetch('/api/titulos/lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cpf: cpfRaw }),
+          });
+          const data = await res.json();
+          if (data.success && data.compras) {
+            const winners: string[] = [];
+            data.compras.forEach((compra: any) => {
+              if (compra.bilhetes) {
+                compra.bilhetes.forEach((b: any) => {
+                  if (b.premiada) winners.push(b.numero);
+                });
+              }
+            });
+            if (winners.length > 0) {
+              setWinningTickets(winners);
+            }
+          }
+        } catch { }
+      };
+
+      checkWinnings();
+    }
+  }, [paymentStatus, pixData]);
 
   // SSE: escuta confirmação push do servidor para esta transação
   useEffect(() => {
@@ -576,14 +647,29 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
               )}
               <p className="text-xs font-bold text-gray-800"><b>Total:</b> {pixData!.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
               <div className="text-xs text-gray-700">
-                <b>Títulos:</b>
                 {titles.length > 0 ? (
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {titles.map((title, index) => (
-                      <span key={index} className="bg-blue-100 text-blue-800 font-semibold px-2 py-1 rounded-md text-xs">
-                        {title}
-                      </span>
-                    ))}
+                  <div className="flex flex-wrap gap-2 mt-2 justify-center">
+                    {titles.map((title, index) => {
+                      const isWinning = winningTickets.includes(title);
+                      return isWinning ? (
+                        <Link
+                          key={index}
+                          href="/meus-titulos"
+                          className="relative group bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 text-yellow-900 border-2 border-yellow-600 font-extrabold px-3 py-1.5 rounded-lg text-sm animate-pulse shadow-[0_0_15px_rgba(234,179,8,0.6)] hover:scale-110 transition-transform duration-300 flex items-center gap-1 cursor-pointer"
+                          title="Bilhete Premiado! Clique para resgatar."
+                        >
+                          <i className="bi bi-trophy-fill text-yellow-700"></i>
+                          {title}
+                          <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full animate-bounce">
+                            GANHOU!
+                          </span>
+                        </Link>
+                      ) : (
+                        <span key={index} className="bg-blue-50 text-blue-700 border border-blue-200 font-semibold px-2 py-1 rounded-md text-xs">
+                          {title}
+                        </span>
+                      );
+                    })}
                   </div>
                 ) : (
                   <span className="text-gray-500"> Os títulos serão adicionados após o pagamento</span>
