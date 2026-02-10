@@ -226,16 +226,13 @@ const PurchaseSection = ({
               </div>
             </div>
 
-            {campaignImage && (
-              <Image
-                src={campaignImage}
-                alt={campaignTitle || 'Campanha'}
-                fill
-                className="object-cover"
-                priority
-                unoptimized
-              />
-            )}
+            <Image
+              src="/card1.png"
+              alt={campaignTitle || 'Campanha'}
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
 
@@ -338,7 +335,7 @@ const PurchaseSection = ({
 
             {/* Botão Comprar */}
             <button
-              onClick={() => handleOpenCheckout(quantity, totalPrice, campaignTitle, campaignImage, Math.floor(quantity / 5) * 2)}
+              onClick={() => handleOpenCheckout(quantity, totalPrice, campaignTitle, '/card1.png', Math.floor(quantity / 5) * 2)}
               className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-0 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
               <div className="flex flex-col items-start justify-center h-full gap-0.5">
@@ -400,11 +397,10 @@ const PurchaseSection = ({
               </div>
 
               <Image
-                src="https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482"
+                src="/card2.png"
                 alt={`${currentDayName} dos Sonhos`}
                 fill
                 className="object-cover"
-                unoptimized
                 priority
               />
             </div>
@@ -495,7 +491,7 @@ const PurchaseSection = ({
                 >+</button>
               </div>
               <button
-                onClick={() => handleOpenCheckout(quantity2, getCard2Price(quantity2), `${currentDayName || 'Hoje'} dos Sonhos`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482', Math.floor(quantity2 / 40) * 2)}
+                onClick={() => handleOpenCheckout(quantity2, getCard2Price(quantity2), `${currentDayName || 'Hoje'} dos Sonhos`, '/card2.png', Math.floor(quantity2 / 40) * 2)}
                 className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg"
               >
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
@@ -533,11 +529,10 @@ const PurchaseSection = ({
           <div className="pb-0">
             <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden">
               <Image
-                src="https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/62/323532393437313938.png?fm=webp&cs=origin&auto=compress&w=858&h=482"
+                src="/card3.png"
                 alt={`${nextDayName} Premiada`}
                 fill
                 className="object-cover"
-                unoptimized
               />
             </div>
           </div>
@@ -612,7 +607,7 @@ const PurchaseSection = ({
                 >+</button>
               </div>
               <button
-                onClick={() => handleOpenCheckout(quantity3, getCard3Price(quantity3), `${nextDayName || 'Amanhã'} Premiada`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/62/323532393437313938.png?fm=webp&cs=origin&auto=compress&w=858&h=482', Math.floor(quantity3 / 50) * 2)}
+                onClick={() => handleOpenCheckout(quantity3, getCard3Price(quantity3), `${nextDayName || 'Amanhã'} Premiada`, '/card3.png', Math.floor(quantity3 / 50) * 2)}
                 className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg"
               >
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
